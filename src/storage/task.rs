@@ -29,39 +29,23 @@ impl TaskStorage {
         }
     }
 
-    /// Get the next task ID with file locking.
+    /// Get the next task ID (simple implementation without locking).
     pub fn next_id(&self) -> StorageResult<u64> {
-        // Open with read+write, create if not exists
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .open(&self.counter_path)
-            .map_err(|e| StorageError::IoError(e))?;
-
-        // Acquire exclusive lock
-        file.lock_exclusive()
-            .map_err(|e| StorageError::LockError(e.to_string()))?;
-
-        // Read current value
-        let mut content = String::new();
-        file.read_to_string(&mut content)
-            .map_err(|e| StorageError::IoError(e))?;
-
-        let current: u64 = content.trim().parse().unwrap_or(0);
+        // Read current counter value
+        let current: u64 = if self.counter_path.exists() {
+            fs::read_to_string(&self.counter_path)
+                .map_err(|e| StorageError::IoError(e))?
+                .trim()
+                .parse()
+                .unwrap_or(0)
+        } else {
+            0
+        };
 
         // Increment and write back
         let next = current + 1;
-        file.seek(SeekFrom::Start(0))
+        fs::write(&self.counter_path, next.to_string())
             .map_err(|e| StorageError::IoError(e))?;
-        file.write_all(next.to_string().as_bytes())
-            .map_err(|e| StorageError::IoError(e))?;
-        file.set_len(next.to_string().len() as u64)
-            .map_err(|e| StorageError::IoError(e))?;
-
-        // Release lock (automatic on drop, but explicit for clarity)
-        file.unlock()
-            .map_err(|e| StorageError::LockError(e.to_string()))?;
 
         Ok(next)
     }

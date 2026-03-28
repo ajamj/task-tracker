@@ -35,7 +35,7 @@ pub enum Commands {
         due: Option<String>,
 
         /// Priority (P0, P1, P2, P3)
-        #[arg(long, short, default_value = "P2")]
+        #[arg(long, short = 'r', default_value = "P2")]
         priority: String,
 
         /// Tags (can be used multiple times)

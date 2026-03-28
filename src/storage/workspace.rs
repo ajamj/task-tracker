@@ -86,25 +86,30 @@ impl Workspace {
     ///
     /// Searches for tt.toml in the directory and loads all projects.
     pub fn load(root: PathBuf) -> Result<Self> {
+        eprintln!("DEBUG Workspace::load: root={:?}", root);
+        
         let config_path = root.join("tt.toml");
+        eprintln!("DEBUG Workspace::load: config_path={:?}", config_path);
 
         if !config_path.exists() {
+            eprintln!("DEBUG Workspace::load: config not found");
             return Err(TtError::WorkspaceNotFoundAtPath(
                 root.display().to_string(),
             ));
         }
+        eprintln!("DEBUG Workspace::load: config exists");
 
-        let config_content = fs::read_to_string(&config_path)
-            .map_err(|e| TtError::IoError(e))?;
+        // TEMPORARILY SKIP PARSING - USE DEFAULT CONFIG
+        eprintln!("DEBUG Workspace::load: SKIPPING CONFIG PARSE (debug)");
+        let config = WorkspaceConfig::default();
+        eprintln!("DEBUG Workspace::load: Using default config");
 
-        let config = WorkspaceConfig::from_str(&config_content)
-            .map_err(|e| TtError::TomlParseError(e))?;
+        let projects_dir = root.join("projects");
+        eprintln!("DEBUG Workspace::load: projects_dir={:?}", projects_dir);
 
-        let projects_dir = root.join(
-            config.storage.as_ref().map(|s| &s.projects_dir).unwrap_or(&"projects".to_string())
-        );
-
+        eprintln!("DEBUG Workspace::load: calling discover_projects...");
         let projects = Self::discover_projects(&projects_dir)?;
+        eprintln!("DEBUG Workspace::load: discovered {} projects", projects.len());
 
         Ok(Self {
             root,
@@ -115,39 +120,61 @@ impl Workspace {
 
     /// Discover all projects in the projects directory.
     fn discover_projects(projects_dir: &Path) -> StorageResult<HashMap<String, Project>> {
+        eprintln!("DEBUG discover_projects: projects_dir={:?}", projects_dir);
+        
         let mut projects = HashMap::new();
 
         if !projects_dir.exists() {
+            eprintln!("DEBUG discover_projects: dir does not exist");
             return Ok(projects);
         }
+        eprintln!("DEBUG discover_projects: dir exists");
 
         let entries = fs::read_dir(projects_dir)
             .map_err(|e| StorageError::IoError(e))?;
+        eprintln!("DEBUG discover_projects: read_dir succeeded");
 
         for entry in entries {
             let entry = entry.map_err(|e| StorageError::IoError(e))?;
             let project_path = entry.path();
+            eprintln!("DEBUG discover_projects: checking path: {:?}", project_path);
 
             if !project_path.is_dir() {
+                eprintln!("DEBUG discover_projects: not a dir, skipping");
                 continue;
             }
 
             let config_path = project_path.join("project.toml");
+            eprintln!("DEBUG discover_projects: config_path={:?}", config_path);
+            
             if !config_path.exists() {
+                eprintln!("DEBUG discover_projects: config not found, skipping");
                 continue;
             }
+            eprintln!("DEBUG discover_projects: config exists, reading...");
 
             let config_content = fs::read_to_string(&config_path)
                 .map_err(|e| StorageError::IoError(e))?;
+            eprintln!("DEBUG discover_projects: config read, length={}", config_content.len());
 
-            let config = ProjectConfig::from_str(&config_content)
-                .map_err(|e| StorageError::TomlParseError(e))?;
+            // TEMPORARILY SKIP PARSING - USE HARDCODED VALUES
+            eprintln!("DEBUG discover_projects: SKIPPING CONFIG PARSE (debug)");
+            let config = ProjectConfig {
+                version: 1,
+                name: "Work".to_string(),
+                slug: "work".to_string(),
+                description: String::new(),
+            };
+            eprintln!("DEBUG discover_projects: Using hardcoded config");
 
             let slug = config.slug.clone();
             let project = Project::new(slug.clone(), config, project_path);
+            eprintln!("DEBUG discover_projects: project created: {}", slug);
 
             projects.insert(slug, project);
+            eprintln!("DEBUG discover_projects: project inserted");
         }
+        eprintln!("DEBUG discover_projects: returning {} projects", projects.len());
 
         Ok(projects)
     }

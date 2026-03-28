@@ -131,20 +131,30 @@ fn cmd_init() -> Result<()> {
 
 /// Add a new task.
 fn cmd_add(args: AddArgs) -> Result<()> {
+    eprintln!("DEBUG cmd_add: Starting...");
+    
     let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    eprintln!("DEBUG cmd_add: Got cwd: {:?}", cwd);
+    
     let workspace = Workspace::load(cwd)?;
+    eprintln!("DEBUG cmd_add: Loaded workspace");
 
     // Get project
     let project_slug = args.project.as_deref().unwrap_or(workspace.default_project_slug());
     let project = workspace
         .get_project(project_slug)
         .ok_or_else(|| TtError::ProjectNotFound(project_slug.to_string()))?;
+    eprintln!("DEBUG cmd_add: Got project: {}", project_slug);
 
     // Create task storage
+    eprintln!("DEBUG cmd_add: Creating task storage...");
     let task_storage = TaskStorage::new(project.tasks_dir.clone());
+    eprintln!("DEBUG cmd_add: Task storage created");
 
     // Get next ID
+    eprintln!("DEBUG cmd_add: Getting next ID...");
     let next_id = task_storage.next_id()?;
+    eprintln!("DEBUG cmd_add: Got next ID: {}", next_id);
 
     // Parse priority
     let priority = match args.priority.as_str() {
@@ -154,8 +164,10 @@ fn cmd_add(args: AddArgs) -> Result<()> {
         "P3" => Priority::P3,
         _ => Priority::P2,
     };
+    eprintln!("DEBUG cmd_add: Priority: {:?}", priority);
 
     // Build task
+    eprintln!("DEBUG cmd_add: Building task...");
     let mut builder = NewTask::builder(&args.title)
         .project(project_slug)
         .priority(priority);
@@ -176,17 +188,23 @@ fn cmd_add(args: AddArgs) -> Result<()> {
         builder = builder.estimate(estimate);
     }
 
+    eprintln!("DEBUG cmd_add: Calling builder.build()...");
     let mut task = builder.build(next_id);
+    eprintln!("DEBUG cmd_add: Task built: {}", task.id);
 
     // Set file path
     let _now = Local::now();
+    eprintln!("DEBUG cmd_add: Getting task path...");
     task.file_path = task_storage
         .task_path(&task.id)
         .to_string_lossy()
         .to_string();
+    eprintln!("DEBUG cmd_add: Task path: {}", task.file_path);
 
     // Create task
+    eprintln!("DEBUG cmd_add: Creating task in storage...");
     task_storage.create(&task)?;
+    eprintln!("DEBUG cmd_add: Task created successfully!");
 
     println!("Created task: {}", task.id);
     println!("Project:    {}", project_slug);
