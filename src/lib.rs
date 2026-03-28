@@ -23,7 +23,7 @@ pub mod reports;
 pub mod cli;
 pub mod api;
 pub mod dashboard;
-// pub mod search;  // Temporarily disabled due to tantivy dependency conflict
+pub mod search;
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};

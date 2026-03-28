@@ -1,0 +1,61 @@
+   Compiling tt v0.1.0 (D:\GRC-Ajam\rust-playground)
+warning: unused import: `OpenOptions`
+ --> src\storage\task.rs:3:21
+  |
+3 | use std::fs::{self, OpenOptions};
+  |                     ^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused imports: `Read`, `SeekFrom`, `Seek`, and `Write`
+ --> src\storage\task.rs:4:15
+  |
+4 | use std::io::{Read, Seek, SeekFrom, Write};
+  |               ^^^^  ^^^^  ^^^^^^^^  ^^^^^
+
+warning: unused import: `fs2::FileExt`
+ --> src\storage\task.rs:7:5
+  |
+7 | use fs2::FileExt;
+  |     ^^^^^^^^^^^^
+
+warning: unused import: `crate::models::Task`
+ --> src\search\simple.rs:5:5
+  |
+5 | use crate::models::Task;
+  |     ^^^^^^^^^^^^^^^^^^^
+
+error[E0308]: mismatched types
+  --> src\search\simple.rs:36:16
+   |
+36 |         if let Some(ref notes) = task.notes {
+   |                ^^^^^^^^^^^^^^^   ---------- this expression has type `std::string::String`
+   |                |
+   |                expected `String`, found `Option<_>`
+   |
+   = note: expected struct `std::string::String`
+                found enum `std::option::Option<_>`
+
+error[E0308]: mismatched types
+  --> src\search\simple.rs:91:16
+   |
+91 |         if let Some(ref notes) = task.notes {
+   |                ^^^^^^^^^^^^^^^   ---------- this expression has type `std::string::String`
+   |                |
+   |                expected `String`, found `Option<_>`
+   |
+   = note: expected struct `std::string::String`
+                found enum `std::option::Option<_>`
+
+warning: value assigned to `current_section` is never read
+   --> src\reports\weekly.rs:425:31
+    |
+425 |     let mut current_section = String::new();
+    |                               ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+For more information about this error, try `rustc --explain E0308`.
+warning: `tt` (lib) generated 5 warnings
+error: could not compile `tt` (lib) due to 2 previous errors; 5 warnings emitted

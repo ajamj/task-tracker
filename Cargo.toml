@@ -64,7 +64,7 @@ tower = "0.4"
 tower-http = { version = "0.5", features = ["cors", "fs"] }
 http = "1.1"
 
-# Search (temporarily disabled due to zstd dependency conflict)
+# Search (simple regex-based, tantivy disabled due to zstd conflict)
 # tantivy = { version = "0.20", default-features = false, features = ["mmap"] }
 
 [dev-dependencies]

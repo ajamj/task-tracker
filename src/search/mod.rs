@@ -1,10 +1,7 @@
 //! Search module for full-text search across tasks and logs.
 //!
-//! This module provides full-text search capabilities using the tantivy search engine.
-//! It indexes tasks and logs, enabling fast search with filters for project, status, tags, and dates.
+//! This module provides simple regex-based search capabilities.
 
-pub mod index;
-pub mod query;
+pub mod simple;
 
-pub use index::SearchIndex;
-pub use query::{SearchFilters, SearchResult};
+pub use simple::{search_tasks, search_tasks_regex, SearchResult};
