@@ -21,7 +21,8 @@ pub mod models;
 pub mod storage;
 pub mod reports;
 pub mod cli;
-// pub mod search;  // Temporarily disabled due to tantivy dependency conflict
+// pub mod api;  // Dashboard API - disabled for now
+// pub mod dashboard;  // Dashboard UI - disabled for now
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};
