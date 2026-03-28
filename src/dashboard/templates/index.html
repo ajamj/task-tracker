@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,17 @@
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <style>
         :root {
+            /* Light Theme */
+            --bg-gradient-start: #667eea;
+            --bg-gradient-end: #764ba2;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --hover-bg: #f8fafc;
+            --shadow: rgba(0, 0, 0, 0.1);
+            
+            /* Brand Colors */
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --secondary: #8b5cf6;
@@ -14,10 +25,18 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #3b82f6;
-            --dark: #1e293b;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --border: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-gradient-start: #0f172a;
+            --bg-gradient-end: #1e293b;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --hover-bg: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -28,10 +47,11 @@
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: var(--dark);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            color: var(--text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         /* Header */
@@ -43,6 +63,10 @@
             position: sticky;
             top: 0;
             z-index: 100;
+        }
+
+        [data-theme="dark"] header {
+            background: rgba(30, 41, 59, 0.95);
         }
 
         .header-content {
@@ -84,7 +108,34 @@
 
         .logo-text p {
             font-size: 0.875rem;
-            color: var(--gray);
+            color: var(--text-secondary);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
         }
 
         /* Navigation */
@@ -97,7 +148,7 @@
             padding: 0.625rem 1.25rem;
             border-radius: 8px;
             text-decoration: none;
-            color: var(--gray);
+            color: var(--text-secondary);
             font-weight: 500;
             transition: all 0.2s;
         }
@@ -115,6 +166,84 @@
             padding: 2rem;
         }
 
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px var(--shadow);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .filter-select,
+        .filter-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus,
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .filter-input {
+            min-width: 250px;
+        }
+
+        .btn-filter {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-reset {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -124,10 +253,10 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px var(--shadow);
             transition: transform 0.2s, box-shadow 0.2s;
             position: relative;
             overflow: hidden;
@@ -145,7 +274,7 @@
 
         .stat-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 25px -5px var(--shadow);
         }
 
         .stat-card.todo::before { background: var(--info); }
@@ -187,18 +316,18 @@
         .stat-card.blocked .stat-value { color: var(--danger); }
 
         .stat-label {
-            color: var(--gray);
+            color: var(--text-secondary);
             font-size: 0.875rem;
             font-weight: 500;
         }
 
         /* Quick Add Section */
         .quick-add {
-            background: white;
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px var(--shadow);
         }
 
         .quick-add h2 {
@@ -219,9 +348,11 @@
             flex: 1;
             min-width: 300px;
             padding: 0.75rem 1rem;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
             transition: border-color 0.2s;
         }
 
@@ -232,10 +363,12 @@
 
         .quick-add-form select {
             padding: 0.75rem 1rem;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
             cursor: pointer;
+            background: var(--card-bg);
+            color: var(--text-primary);
         }
 
         .btn {
@@ -263,10 +396,10 @@
 
         /* Tasks Section */
         .tasks-section {
-            background: white;
+            background: var(--card-bg);
             border-radius: 16px;
             padding: 1.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 15px -3px var(--shadow);
         }
 
         .section-header {
@@ -289,7 +422,7 @@
 
         .task-item {
             padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             gap: 1rem;
@@ -301,14 +434,14 @@
         }
 
         .task-item:hover {
-            background: var(--light);
+            background: var(--hover-bg);
             border-radius: 8px;
         }
 
         .task-checkbox {
             width: 20px;
             height: 20px;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-color);
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s;
@@ -336,12 +469,12 @@
             display: flex;
             gap: 0.75rem;
             font-size: 0.875rem;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
 
         .task-id {
             font-family: 'Monaco', 'Consolas', monospace;
-            background: var(--light);
+            background: var(--hover-bg);
             padding: 0.125rem 0.5rem;
             border-radius: 4px;
             color: var(--primary);
@@ -358,7 +491,7 @@
         .priority-P0 { background: var(--danger); color: white; }
         .priority-P1 { background: var(--warning); color: white; }
         .priority-P2 { background: var(--info); color: white; }
-        .priority-P3 { background: var(--gray); color: white; }
+        .priority-P3 { background: var(--text-secondary); color: white; }
 
         .task-actions {
             display: flex;
@@ -372,8 +505,8 @@
 
         .btn-outline {
             background: transparent;
-            border: 2px solid var(--border);
-            color: var(--gray);
+            border: 2px solid var(--border-color);
+            color: var(--text-secondary);
         }
 
         .btn-outline:hover {
@@ -385,7 +518,7 @@
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
 
         .empty-state-icon {
@@ -397,13 +530,13 @@
         .loading {
             text-align: center;
             padding: 2rem;
-            color: var(--gray);
+            color: var(--text-secondary);
         }
 
         .spinner {
             width: 40px;
             height: 40px;
-            border: 4px solid var(--border);
+            border: 4px solid var(--border-color);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -428,6 +561,15 @@
 
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                flex-direction: column;
             }
 
             .quick-add-form {
@@ -461,16 +603,51 @@
                     <p>Git-friendly Task Tracker</p>
                 </div>
             </div>
-            <nav>
-                <a href="/" class="active">📊 Today</a>
-                <a href="/tasks">📝 Tasks</a>
-                <a href="/reports">📈 Reports</a>
-            </nav>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <nav>
+                    <a href="/" class="active">📊 Today</a>
+                    <a href="/tasks">📝 Tasks</a>
+                    <a href="/reports">📈 Reports</a>
+                </nav>
+                <div class="theme-toggle">
+                    <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+                        🌙
+                    </button>
+                </div>
+            </div>
         </div>
     </header>
 
     <!-- Main Content -->
     <div class="container">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label for="filter-status">Status:</label>
+                <select id="filter-status" class="filter-select" onchange="filterTasks()">
+                    <option value="">All Status</option>
+                    <option value="TODO">Todo</option>
+                    <option value="DOING">Doing</option>
+                    <option value="DONE">Done</option>
+                    <option value="BLOCKED">Blocked</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filter-priority">Priority:</label>
+                <select id="filter-priority" class="filter-select" onchange="filterTasks()">
+                    <option value="">All Priorities</option>
+                    <option value="P0">P0 - Critical</option>
+                    <option value="P1">P1 - High</option>
+                    <option value="P2">P2 - Medium</option>
+                    <option value="P3">P3 - Low</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" id="filter-search" class="filter-input" placeholder="🔍 Search tasks..." onkeyup="filterTasks()">
+            </div>
+            <button class="btn-reset" onclick="resetFilters()">Reset</button>
+        </div>
+
         <!-- Stats Grid -->
         <div class="stats-grid" id="stats-grid" hx-get="/api/stats" hx-trigger="load">
             <div class="loading">
@@ -515,7 +692,106 @@
 
     <!-- Scripts -->
     <script>
-        // Update stats display
+        // Theme Toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const btn = document.getElementById('theme-toggle');
+            
+            html.setAttribute('data-theme', newTheme);
+            btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            
+            // Save preference
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-toggle');
+            
+            html.setAttribute('data-theme', savedTheme);
+            btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // Task Filtering
+        let allTasks = [];
+
+        function filterTasks() {
+            const status = document.getElementById('filter-status').value;
+            const priority = document.getElementById('filter-priority').value;
+            const search = document.getElementById('filter-search').value.toLowerCase();
+
+            let filtered = allTasks;
+
+            if (status) {
+                filtered = filtered.filter(t => t.status === status);
+            }
+
+            if (priority) {
+                filtered = filtered.filter(t => t.priority === priority);
+            }
+
+            if (search) {
+                filtered = filtered.filter(t => 
+                    t.title.toLowerCase().includes(search) ||
+                    t.id.toLowerCase().includes(search) ||
+                    (t.tags && t.tags.some(tag => tag.toLowerCase().includes(search)))
+                );
+            }
+
+            renderTasks(filtered);
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-status').value = '';
+            document.getElementById('filter-priority').value = '';
+            document.getElementById('filter-search').value = '';
+            renderTasks(allTasks);
+        }
+
+        function renderTasks(tasks) {
+            allTasks = tasks;
+            const container = document.getElementById('task-list');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎉</div>
+                        <h3>No tasks found!</h3>
+                        <p>Try adjusting your filters or add a new task.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<ul class="task-list">';
+            tasks.forEach(task => {
+                html += `
+                    <li class="task-item">
+                        <div class="task-checkbox ${task.status === 'DONE' ? 'checked' : ''}"></div>
+                        <div class="task-content">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-meta">
+                                <span class="task-id">${task.id}</span>
+                                <span class="priority-badge priority-${task.priority}">${task.priority}</span>
+                                ${task.tags && task.tags.length > 0 ? `<span>🏷️ ${task.tags.join(', ')}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="btn btn-outline btn-sm">View</button>
+                            ${task.status !== 'DONE' ? '<button class="btn btn-primary btn-sm">✓ Done</button>' : ''}
+                        </div>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
+        }
+
+        // HTMX integration for filtering
         document.body.addEventListener('htmx:afterSwap', function(event) {
             if (event.detail.target.id === 'stats-grid') {
                 const data = JSON.parse(event.detail.xhr.responseText);
@@ -524,28 +800,28 @@
                         <div class="stat-header">
                             <div class="stat-icon">📋</div>
                         </div>
-                        <div class="stat-value">${data.todo}</div>
+                        <div class="stat-value">${data.todo || 0}</div>
                         <div class="stat-label">Todo</div>
                     </div>
                     <div class="stat-card doing">
                         <div class="stat-header">
                             <div class="stat-icon">⏳</div>
                         </div>
-                        <div class="stat-value">${data.doing}</div>
+                        <div class="stat-value">${data.doing || 0}</div>
                         <div class="stat-label">Doing</div>
                     </div>
                     <div class="stat-card done">
                         <div class="stat-header">
                             <div class="stat-icon">✅</div>
                         </div>
-                        <div class="stat-value">${data.done}</div>
+                        <div class="stat-value">${data.done || 0}</div>
                         <div class="stat-label">Done</div>
                     </div>
                     <div class="stat-card blocked">
                         <div class="stat-header">
                             <div class="stat-icon">🚫</div>
                         </div>
-                        <div class="stat-value">${data.blocked}</div>
+                        <div class="stat-value">${data.blocked || 0}</div>
                         <div class="stat-label">Blocked</div>
                     </div>
                 `;
@@ -554,36 +830,9 @@
             if (event.detail.target.id === 'task-list') {
                 const data = JSON.parse(event.detail.xhr.responseText);
                 if (data.tasks && data.tasks.length > 0) {
-                    let html = '<ul class="task-list">';
-                    data.tasks.forEach(task => {
-                        html += `
-                            <li class="task-item">
-                                <div class="task-checkbox ${task.status === 'DONE' ? 'checked' : ''}"></div>
-                                <div class="task-content">
-                                    <div class="task-title">${task.title}</div>
-                                    <div class="task-meta">
-                                        <span class="task-id">${task.id}</span>
-                                        <span class="priority-badge priority-${task.priority}">${task.priority}</span>
-                                        ${task.tags && task.tags.length > 0 ? `<span>🏷️ ${task.tags.join(', ')}</span>` : ''}
-                                    </div>
-                                </div>
-                                <div class="task-actions">
-                                    <button class="btn btn-outline btn-sm">View</button>
-                                    ${task.status !== 'DONE' ? '<button class="btn btn-primary btn-sm">✓ Done</button>' : ''}
-                                </div>
-                            </li>
-                        `;
-                    });
-                    html += '</ul>';
-                    document.getElementById('task-list').innerHTML = html;
+                    renderTasks(data.tasks);
                 } else {
-                    document.getElementById('task-list').innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🎉</div>
-                            <h3>No tasks yet!</h3>
-                            <p>Add your first task using the quick add form above.</p>
-                        </div>
-                    `;
+                    renderTasks([]);
                 }
             }
         });
