@@ -281,7 +281,7 @@ impl WeeklyReport {
     }
 
     /// Build the template context for this report with smart merging support.
-    fn build_context(&self) -> WeeklyReportContext {
+    fn build_context(&self) -> WeeklyReportContext<'_> {
         let logs = self.highlights
             .iter()
             .map(|day| LogContext {
@@ -452,7 +452,7 @@ fn extract_highlights_from_log(content: &str) -> Vec<String> {
         }
     }
 
-    // Limit items per day
+    // Limit items per day (configurable in future)
     items.truncate(10);
 
     items

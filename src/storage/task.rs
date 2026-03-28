@@ -1,13 +1,13 @@
 //! Task file I/O and ID generation with file locking.
 
-use std::fs::{self, File, OpenOptions};
+use std::fs::{self, OpenOptions};
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
 
 use fs2::FileExt;
 use toml_edit::{DocumentMut, value};
 
-use crate::error::{Result, StorageError, StorageResult, TtError};
+use crate::error::{StorageError, StorageResult};
 use crate::models::{Task, TaskStatus};
 use chrono::{Datelike, Local};
 

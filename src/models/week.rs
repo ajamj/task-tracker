@@ -1,6 +1,6 @@
 //! Week range calculations with ISO-8601 Monday start.
 
-use chrono::{Datelike, Duration, NaiveDate, Weekday};
+use chrono::{Datelike, Duration, NaiveDate};
 use regex::Regex;
 use serde::Serialize;
 

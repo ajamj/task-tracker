@@ -2,7 +2,6 @@
 
 use clap::Parser;
 use tt::cli::{Cli, execute};
-use tt::error::TtError;
 
 fn main() {
     // Initialize tracing subscriber for logging

@@ -1,7 +1,6 @@
 //! Output formatting and git suggestions.
 
 use crate::models::Task;
-use crate::storage::Project;
 
 /// Git suggestions for a command.
 pub struct GitSuggestion {
@@ -12,7 +11,7 @@ pub struct GitSuggestion {
 
 impl GitSuggestion {
     /// Create git suggestion for task add.
-    pub fn for_task_add(task: &Task, project: &str) -> Self {
+    pub fn for_task_add(task: &Task, _project: &str) -> Self {
         Self {
             branch: Some(task.git_suggestions.branch.clone()),
             commit_message: task.git_suggestions.commit_add.clone(),
@@ -21,7 +20,7 @@ impl GitSuggestion {
     }
 
     /// Create git suggestion for task start.
-    pub fn for_task_start(task: &Task, project: &str) -> Self {
+    pub fn for_task_start(task: &Task, _project: &str) -> Self {
         Self {
             branch: Some(task.git_suggestions.branch.clone()),
             commit_message: task.git_suggestions.commit_start.clone(),
@@ -30,7 +29,7 @@ impl GitSuggestion {
     }
 
     /// Create git suggestion for task done.
-    pub fn for_task_done(task: &Task, project: &str) -> Self {
+    pub fn for_task_done(task: &Task, _project: &str) -> Self {
         Self {
             branch: Some(task.git_suggestions.branch.clone()),
             commit_message: task.git_suggestions.commit_done.clone(),
@@ -105,7 +104,7 @@ fn style(text: &str, color: &str, bold: bool) -> String {
         return text.to_string();
     }
 
-    let (prefix, suffix) = match color {
+    let (prefix, _suffix) = match color {
         "yellow" => ("\x1b[33m", "\x1b[0m"),
         "cyan" => ("\x1b[36m", "\x1b[0m"),
         "green" => ("\x1b[32m", "\x1b[0m"),

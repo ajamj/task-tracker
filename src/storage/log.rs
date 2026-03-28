@@ -1,9 +1,9 @@
 //! Log file I/O and template management.
 
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::error::{Result, StorageError, StorageResult, TtError};
+use crate::error::{StorageError, StorageResult};
 
 /// Default daily log template.
 const DEFAULT_LOG_TEMPLATE: &str = r#"# {{date}} ({{project}})

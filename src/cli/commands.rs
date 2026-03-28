@@ -1,6 +1,5 @@
 //! CLI command implementations.
 
-use std::path::PathBuf;
 use chrono::Local;
 
 use crate::cli::args::Commands;
@@ -57,14 +56,14 @@ pub fn execute(command: Commands) -> Result<()> {
         }),
         Commands::Report { week, project } => cmd_report(week, project),
         Commands::Search {
-            query,
-            project,
-            status,
-            tag,
-            from,
-            to,
-            json,
-            limit,
+            query: _,
+            project: _,
+            status: _,
+            tag: _,
+            from: _,
+            to: _,
+            json: _,
+            limit: _,
         } => {
             // Search disabled temporarily
             println!("Search feature temporarily disabled due to dependency compatibility issues.");
@@ -115,7 +114,7 @@ pub struct SearchArgs {
 /// Initialize a new workspace.
 fn cmd_init() -> Result<()> {
     let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
-    let workspace = Workspace::init(cwd.clone())?;
+    let _workspace = Workspace::init(cwd.clone())?;
 
     println!("Initialized tt workspace (version 1)");
     println!("- Created: tt.toml");
@@ -180,7 +179,7 @@ fn cmd_add(args: AddArgs) -> Result<()> {
     let mut task = builder.build(next_id);
 
     // Set file path
-    let now = Local::now();
+    let _now = Local::now();
     task.file_path = task_storage
         .task_path(&task.id)
         .to_string_lossy()

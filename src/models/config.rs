@@ -3,7 +3,6 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
-use std::path::PathBuf;
 
 /// Root workspace configuration (tt.toml).
 #[derive(Debug, Clone, Serialize, Deserialize)]
