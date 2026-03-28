@@ -1,0 +1,180 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+  release:
+    types: [ created ]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_VERSION: 1.75
+
+jobs:
+  # Build and Test
+  build-and-test:
+    name: Build & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+    
+    - name: Cache Cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+    
+    - name: Build
+      run: cargo build --verbose --release
+    
+    - name: Run tests
+      run: cargo test --verbose --release
+    
+    - name: Run clippy
+      run: cargo clippy -- -D warnings
+    
+    - name: Check formatting
+      run: cargo fmt --check
+    
+    - name: Upload binary (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: tt-windows
+        path: target/release/tt.exe
+    
+    - name: Upload binary (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      uses: actions/upload-artifact@v4
+      with:
+        name: tt-${{ matrix.os }}
+        path: target/release/tt
+
+  # Integration Tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+    
+    - name: Run integration tests
+      run: cargo test --test integration_tests --verbose
+
+  # Build Release Binaries
+  build-release:
+    name: Build Release Binaries
+    runs-on: ${{ matrix.os }}
+    needs: [build-and-test, integration-tests]
+    if: github.event_name == 'release'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+    
+    - name: Build release
+      run: cargo build --release --verbose
+    
+    - name: Create release archive (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cd target/release
+        tar czf tt-${{ github.ref_name }}-${{ matrix.os }}.tar.gz tt
+        sha256sum tt-${{ github.ref_name }}-${{ matrix.os }}.tar.gz > tt-${{ github.ref_name }}-${{ matrix.os }}.tar.gz.sha256
+    
+    - name: Create release archive (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd target/release
+        Compress-Archive -Path tt.exe -DestinationPath tt-${{ github.ref_name }}-windows.zip
+        Get-FileHash tt-${{ github.ref_name }}-windows.zip -Algorithm SHA256 | ForEach-Object { $_.Hash } > tt-${{ github.ref_name }}-windows.zip.sha256
+    
+    - name: Upload release assets (Unix)
+      if: matrix.os != 'windows-latest'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          target/release/tt-${{ github.ref_name }}-${{ matrix.os }}.tar.gz
+          target/release/tt-${{ github.ref_name }}-${{ matrix.os }}.tar.gz.sha256
+    
+    - name: Upload release assets (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          target/release/tt-${{ github.ref_name }}-windows.zip
+          target/release/tt-${{ github.ref_name }}-windows.zip.sha256
+
+  # Publish to crates.io
+  publish-crates:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    needs: [build-and-test, integration-tests]
+    if: github.event_name == 'release'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+    
+    - name: Publish to crates.io
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+      run: cargo publish
+      continue-on-error: true
+
+  # Deploy Dashboard (GitHub Pages)
+  deploy-dashboard:
+    name: Deploy Dashboard Demo
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        toolchain: ${{ env.RUST_VERSION }}
+    
+    - name: Build dashboard
+      run: cargo build --release
+    
+    - name: Upload dashboard artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: tt-dashboard
+        path: target/release/tt
