@@ -95,7 +95,7 @@ impl Workspace {
         }
 
         let config_content = fs::read_to_string(&config_path)
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
 
         // Use toml crate for parsing (avoids recursion issue with toml_edit)
         let config: WorkspaceConfig = toml::from_str(&config_content)
@@ -123,10 +123,10 @@ impl Workspace {
         }
 
         let entries = fs::read_dir(projects_dir)
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         for entry in entries {
-            let entry = entry.map_err(|e| StorageError::IoError(e))?;
+            let entry = entry.map_err(StorageError::IoError)?;
             let project_path = entry.path();
 
             if !project_path.is_dir() {
@@ -139,7 +139,7 @@ impl Workspace {
             }
 
             let config_content = fs::read_to_string(&config_path)
-                .map_err(|e| StorageError::IoError(e))?;
+                .map_err(StorageError::IoError)?;
 
             // Use toml crate for parsing (avoids recursion issue with toml_edit)
             let config: ProjectConfig = toml::from_str(&config_content)
@@ -176,26 +176,26 @@ impl Workspace {
         // Create tt.toml
         let config_path = root.join("tt.toml");
         fs::write(&config_path, WorkspaceConfig::default_toml())
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
 
         // Create projects/work directory
         let projects_dir = root.join("projects");
         let work_dir = projects_dir.join("work");
         fs::create_dir_all(&work_dir)
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
 
         // Create project.toml
         let project_config_path = work_dir.join("project.toml");
         fs::write(&project_config_path, ProjectConfig::default_toml("Work", "work"))
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
 
         // Create tasks, logs, reports directories
         fs::create_dir_all(work_dir.join("tasks").join("2026").join("03"))
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
         fs::create_dir_all(work_dir.join("logs").join("2026"))
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
         fs::create_dir_all(work_dir.join("reports").join("weekly"))
-            .map_err(|e| TtError::IoError(e))?;
+            .map_err(TtError::IoError)?;
 
         // Return workspace without calling load (avoid potential recursion)
         let config = WorkspaceConfig::default();

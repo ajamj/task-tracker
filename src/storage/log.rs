@@ -91,7 +91,7 @@ impl LogStorage {
         // Ensure parent directory exists (YYYY/)
         if let Some(parent) = log_path.parent() {
             fs::create_dir_all(parent)
-                .map_err(|e| StorageError::IoError(e))?;
+                .map_err(StorageError::IoError)?;
         }
 
         if log_path.exists() {
@@ -107,7 +107,7 @@ impl LogStorage {
         log.file_path = self.log_path(date);
 
         fs::write(&log.file_path, &log.content)
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         Ok(log)
     }
@@ -124,7 +124,7 @@ impl LogStorage {
         }
 
         let content = fs::read_to_string(&log_path)
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         let mut log = Log {
             date: date.to_string(),
@@ -147,7 +147,7 @@ impl LogStorage {
         log.scan_task_ids();
 
         fs::write(&log.file_path, &log.content)
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         Ok(log)
     }
@@ -167,9 +167,9 @@ impl LogStorage {
 
         // Walk through year directories
         for year_entry in fs::read_dir(&self.logs_dir)
-            .map_err(|e| StorageError::IoError(e))?
+            .map_err(StorageError::IoError)?
         {
-            let year_entry = year_entry.map_err(|e| StorageError::IoError(e))?;
+            let year_entry = year_entry.map_err(StorageError::IoError)?;
             let year_path = year_entry.path();
 
             if !year_path.is_dir() {
@@ -178,9 +178,9 @@ impl LogStorage {
 
             // Walk through log files in year directory
             for log_entry in fs::read_dir(&year_path)
-                .map_err(|e| StorageError::IoError(e))?
+                .map_err(StorageError::IoError)?
             {
-                let log_entry = log_entry.map_err(|e| StorageError::IoError(e))?;
+                let log_entry = log_entry.map_err(StorageError::IoError)?;
                 let log_path = log_entry.path();
 
                 if log_path.extension().and_then(|s| s.to_str()) != Some("md") {

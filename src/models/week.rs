@@ -69,7 +69,7 @@ impl WeekRange {
         let jan4 = NaiveDate::from_ymd_opt(year, 1, 4)?;
         let mut start =
             jan4 - Duration::days(jan4.weekday().num_days_from_monday() as i64);
-        start = start + Duration::days((week - 1) as i64 * 7);
+        start += Duration::days((week - 1) as i64 * 7);
 
         Some(Self::from_date(start))
     }
@@ -85,7 +85,7 @@ impl WeekRange {
         let mut current = self.start;
         while current <= self.end {
             days.push(current);
-            current = current + Duration::days(1);
+            current += Duration::days(1);
         }
         days
     }

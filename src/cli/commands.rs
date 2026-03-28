@@ -116,7 +116,7 @@ pub struct SearchArgs {
 
 /// Initialize a new workspace.
 fn cmd_init() -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let _workspace = Workspace::init(cwd.clone())?;
 
     println!("Initialized tt workspace (version 1)");
@@ -134,7 +134,7 @@ fn cmd_init() -> Result<()> {
 
 /// Add a new task.
 fn cmd_add(args: AddArgs) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -215,7 +215,7 @@ fn cmd_add(args: AddArgs) -> Result<()> {
 
 /// List tasks.
 fn cmd_ls(args: LsArgs) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -239,10 +239,7 @@ fn cmd_ls(args: LsArgs) -> Result<()> {
             }
 
             // By default, hide done and canceled
-            match task.status {
-                TaskStatus::Done | TaskStatus::Canceled => false,
-                _ => true,
-            }
+            !matches!(task.status, TaskStatus::Done | TaskStatus::Canceled)
         })
         .filter(|task| {
             if let Some(ref status_str) = args.status {
@@ -270,7 +267,7 @@ fn cmd_ls(args: LsArgs) -> Result<()> {
 
 /// Show task details.
 fn cmd_show(id: String, project: Option<String>) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -292,7 +289,7 @@ fn cmd_show(id: String, project: Option<String>) -> Result<()> {
 
 /// Start working on a task.
 fn cmd_start(id: String, project: Option<String>) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -342,7 +339,7 @@ fn cmd_start(id: String, project: Option<String>) -> Result<()> {
 
 /// Mark a task as done.
 fn cmd_done(id: String, project: Option<String>) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -388,7 +385,7 @@ fn cmd_done(id: String, project: Option<String>) -> Result<()> {
 
 /// Append to daily log.
 fn cmd_log(args: LogArgs) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -427,7 +424,7 @@ fn cmd_log(args: LogArgs) -> Result<()> {
 
 /// Generate weekly report.
 fn cmd_report(week: Option<String>, project: Option<String>) -> Result<()> {
-    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let cwd = std::env::current_dir().map_err(TtError::IoError)?;
     let workspace = Workspace::load(cwd)?;
 
     // Get project
@@ -459,11 +456,11 @@ fn cmd_report(week: Option<String>, project: Option<String>) -> Result<()> {
 
     // Ensure parent directory exists
     if let Some(parent) = report_path.parent() {
-        std::fs::create_dir_all(parent).map_err(|e| TtError::IoError(e))?;
+        std::fs::create_dir_all(parent).map_err(TtError::IoError)?;
     }
 
     std::fs::write(&report_path, &report_content)
-        .map_err(|e| TtError::IoError(e))?;
+        .map_err(TtError::IoError)?;
 
     println!("Generated weekly report: {} ({})", week.iso_week, project_slug);
     println!("Range:      {} to {}", week.start, week.end);

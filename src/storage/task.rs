@@ -1,10 +1,8 @@
 //! Task file I/O and ID generation with file locking.
 
-use std::fs::{self, OpenOptions};
-use std::io::{Read, Seek, SeekFrom, Write};
+use std::fs::{self};
 use std::path::{Path, PathBuf};
 
-use fs2::FileExt;
 use toml_edit::{DocumentMut, value};
 
 use crate::error::{StorageError, StorageResult};
@@ -34,7 +32,7 @@ impl TaskStorage {
         // Read current counter value
         let current: u64 = if self.counter_path.exists() {
             fs::read_to_string(&self.counter_path)
-                .map_err(|e| StorageError::IoError(e))?
+                .map_err(StorageError::IoError)?
                 .trim()
                 .parse()
                 .unwrap_or(0)
@@ -45,7 +43,7 @@ impl TaskStorage {
         // Increment and write back
         let next = current + 1;
         fs::write(&self.counter_path, next.to_string())
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         Ok(next)
     }
@@ -54,7 +52,7 @@ impl TaskStorage {
     pub fn create(&self, task: &Task) -> StorageResult<()> {
         let doc = task_to_document(task);
         fs::write(&task.file_path, doc.to_string())
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
         Ok(())
     }
 
@@ -67,7 +65,7 @@ impl TaskStorage {
         }
 
         let content = fs::read_to_string(&task_path)
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
 
         parse_task(&content, task_path)
     }
@@ -76,7 +74,7 @@ impl TaskStorage {
     pub fn update(&self, task: &Task) -> StorageResult<()> {
         let doc = task_to_document(task);
         fs::write(&task.file_path, doc.to_string())
-            .map_err(|e| StorageError::IoError(e))?;
+            .map_err(StorageError::IoError)?;
         Ok(())
     }
 
@@ -90,7 +88,7 @@ impl TaskStorage {
 
         // Recursively find all .toml files
         for entry in walk_dir(&self.tasks_dir) {
-            let entry = entry.map_err(|e| StorageError::IoError(e))?;
+            let entry = entry.map_err(StorageError::IoError)?;
             let path = entry.path();
 
             if path.extension().and_then(|s| s.to_str()) != Some("toml") {
@@ -103,7 +101,7 @@ impl TaskStorage {
             }
 
             let content = fs::read_to_string(&path)
-                .map_err(|e| StorageError::IoError(e))?;
+                .map_err(StorageError::IoError)?;
 
             match parse_task(&content, path.clone()) {
                 Ok(task) => tasks.push(task),
@@ -217,7 +215,7 @@ fn task_to_document(task: &Task) -> DocumentMut {
 /// Parse a Task from TOML content.
 fn parse_task(content: &str, path: PathBuf) -> StorageResult<Task> {
     let doc = content.parse::<DocumentMut>()
-        .map_err(|e| StorageError::TomlParseError(e))?;
+        .map_err(StorageError::TomlParseError)?;
 
     let id = doc.get("id")
         .and_then(|v| v.as_str())
@@ -331,14 +329,12 @@ fn walk_dir(dir: &Path) -> Vec<std::io::Result<std::fs::DirEntry>> {
     let mut entries = Vec::new();
 
     if let Ok(read_dir) = fs::read_dir(dir) {
-        for entry in read_dir {
-            if let Ok(entry) = entry {
-                let path = entry.path();
-                if path.is_dir() {
-                    entries.extend(walk_dir(&path));
-                } else {
-                    entries.push(Ok(entry));
-                }
+        for entry in read_dir.flatten() {
+            let path = entry.path();
+            if path.is_dir() {
+                entries.extend(walk_dir(&path));
+            } else {
+                entries.push(Ok(entry));
             }
         }
     }

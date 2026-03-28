@@ -171,19 +171,13 @@ impl Default for GitConfig {
 
 /// Editor configuration.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct EditorConfig {
     /// Editor command (empty = use $EDITOR env var).
     #[serde(default)]
     pub command: String,
 }
 
-impl Default for EditorConfig {
-    fn default() -> Self {
-        Self {
-            command: String::new(),
-        }
-    }
-}
 
 impl Default for WorkspaceConfig {
     fn default() -> Self {
@@ -200,6 +194,7 @@ impl Default for WorkspaceConfig {
 
 impl WorkspaceConfig {
     /// Load workspace config from TOML content.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(content: &str) -> Result<Self, toml_edit::TomlError> {
         content.parse::<Self>()
     }
@@ -286,6 +281,7 @@ description = ""
     }
 
     /// Load project config from TOML content.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(content: &str) -> Result<Self, toml_edit::TomlError> {
         content.parse::<Self>()
     }

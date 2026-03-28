@@ -9,7 +9,9 @@ pub type TaskId = String;
 /// Task status representing the lifecycle state.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 #[serde(rename_all = "lowercase")]
+#[derive(Default)]
 pub enum TaskStatus {
+    #[default]
     Todo,
     Doing,
     Done,
@@ -56,30 +58,22 @@ impl TaskStatus {
     }
 }
 
-impl Default for TaskStatus {
-    fn default() -> Self {
-        TaskStatus::Todo
-    }
-}
 
 /// Task priority levels.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Default)]
 pub enum Priority {
     #[serde(rename = "P0")]
     P0, // Critical
     #[serde(rename = "P1")]
     P1, // High
     #[serde(rename = "P2")]
+    #[default]
     P2, // Medium (default)
     #[serde(rename = "P3")]
     P3, // Low
 }
 
-impl Default for Priority {
-    fn default() -> Self {
-        Priority::P2
-    }
-}
 
 impl Priority {
     /// Display priority as string.

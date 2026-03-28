@@ -80,8 +80,7 @@ impl WeeklyReport {
     ) -> Result<Self> {
         // Get all tasks
         let all_tasks = task_storage.list()
-            .map_err(|e| TtError::IoError(std::io::Error::new(
-                std::io::ErrorKind::Other,
+            .map_err(|e| TtError::IoError(std::io::Error::other(
                 format!("Failed to list tasks: {}", e),
             )))?;
 
@@ -116,8 +115,7 @@ impl WeeklyReport {
             &week.end.to_string(),
             &project.slug,
         )
-        .map_err(|e| TtError::IoError(std::io::Error::new(
-            std::io::ErrorKind::Other,
+        .map_err(|e| TtError::IoError(std::io::Error::other(
             format!("Failed to get logs: {}", e),
         )))?;
 
@@ -135,14 +133,14 @@ impl WeeklyReport {
             for task_id in &log.task_ids {
                 mentioned
                     .entry(task_id.clone())
-                    .or_insert_with(Vec::new)
+                    .or_default()
                     .push(log.date.clone());
 
                 // Check if task exists
                 if !task_ids.contains_key(task_id) {
                     missing
                         .entry(task_id.clone())
-                        .or_insert_with(Vec::new)
+                        .or_default()
                         .push(log.date.clone());
                 }
             }
@@ -419,6 +417,7 @@ fn extract_highlights(logs: &[Log]) -> Vec<HighlightDay> {
 }
 
 /// Extract highlights from a single log file.
+#[allow(unused_assignments)]
 fn extract_highlights_from_log(content: &str) -> Vec<String> {
     let mut items = Vec::new();
     let mut in_section = false;
