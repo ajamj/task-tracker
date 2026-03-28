@@ -57,6 +57,13 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # Utilities
 slug = "0.1"
 
+# Web framework (Dashboard)
+axum = "0.7"
+tokio = { version = "1.36", features = ["full"] }
+tower = "0.4"
+tower-http = { version = "0.5", features = ["cors", "fs"] }
+http = "1.1"
+
 # Search (temporarily disabled due to zstd dependency conflict)
 # tantivy = { version = "0.20", default-features = false, features = ["mmap"] }
 

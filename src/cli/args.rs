@@ -160,6 +160,13 @@ pub enum Commands {
         #[arg(long, short, default_value = "20")]
         limit: usize,
     },
+
+    /// Start the web dashboard
+    Dashboard {
+        /// Port to run the dashboard on
+        #[arg(long, short, default_value = "3000")]
+        port: u16,
+    },
 }
 
 impl Cli {

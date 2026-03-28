@@ -6,7 +6,7 @@ use crate::storage::TaskStorage;
 
 /// List all tasks.
 pub async fn list_tasks(State(state): State<AppState>) -> Json<serde_json::Value> {
-    let project = match state.workspace.default_project() {
+    let project = match state.workspace.get_default_project() {
         Ok(p) => p,
         Err(e) => return Json(serde_json::json!({ "error": e.to_string() })),
     };
@@ -22,8 +22,8 @@ pub async fn list_tasks(State(state): State<AppState>) -> Json<serde_json::Value
                     "status": task.status.to_string(),
                     "priority": task.priority.as_ref().map(|p| p.to_string()),
                     "tags": task.tags.clone(),
-                    "due": task.due,
-                    "created_at": task.created_at,
+                    "due": task.due.clone(),
+                    "created_at": task.created_at.clone(),
                 })
             }).collect();
 

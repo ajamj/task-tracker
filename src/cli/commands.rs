@@ -70,6 +70,7 @@ pub fn execute(command: Commands) -> Result<()> {
             println!("Use 'tt ls' to list tasks instead.");
             Ok(())
         },
+        Commands::Dashboard { .. } => Ok(()),
     }
 }
 

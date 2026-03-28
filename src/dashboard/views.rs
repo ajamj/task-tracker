@@ -12,7 +12,7 @@ pub async fn dashboard() -> impl axum::response::IntoResponse {
 
 /// Get task counts for stats.
 pub async fn get_stats(axum::extract::State(state): axum::extract::State<AppState>) -> axum::Json<serde_json::Value> {
-    let project = match state.workspace.default_project() {
+    let project = match state.workspace.get_default_project() {
         Ok(p) => p,
         Err(_) => return axum::Json(serde_json::json!({ "error": "No project found" })),
     };
