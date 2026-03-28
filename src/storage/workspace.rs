@@ -195,8 +195,15 @@ impl Workspace {
         fs::create_dir_all(work_dir.join("reports").join("weekly"))
             .map_err(|e| TtError::IoError(e))?;
 
-        // Load and return the workspace
-        Self::load(root)
+        // Return workspace without calling load (avoid potential recursion)
+        let config = WorkspaceConfig::default();
+        let projects = HashMap::new();
+        
+        Ok(Self {
+            root,
+            config,
+            projects,
+        })
     }
 
     /// Check if workspace has any projects.
