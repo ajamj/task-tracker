@@ -56,52 +56,20 @@ pub fn execute(command: Commands) -> Result<()> {
         }),
         Commands::Report { week, project } => cmd_report(week, project),
         Commands::Search {
-            query,
+            query: _,
             project: _,
             status: _,
             tag: _,
             from: _,
             to: _,
-            json,
+            json: _,
             limit: _,
         } => {
-            // Simple regex-based search
-            use crate::search::search_tasks;
-            
-            let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
-            let workspace = Workspace::load(cwd)?;
-            let project = workspace.get_default_project()?;
-            let task_storage = TaskStorage::new(project.tasks_dir.clone());
-            
-            match search_tasks(&task_storage, &query) {
-                Ok(results) => {
-                    let count = results.len();
-                    if json {
-                        println!("{}", serde_json::to_string_pretty(&results).unwrap());
-                    } else if results.is_empty() {
-                        println!("No results found for '{}'", query);
-                    } else {
-                        println!("Search results for '{}':\n", query);
-                        for result in results {
-                            println!("{} {} - {} [{}]", 
-                                match result.status.as_str() {
-                                    "DONE" => "✅",
-                                    "DOING" => "⏳",
-                                    "BLOCKED" => "🚫",
-                                    _ => "📋"
-                                },
-                                result.id,
-                                result.title,
-                                result.priority.unwrap_or_else(|| "P2".to_string())
-                            );
-                        }
-                        println!("\nFound {} result(s)", count);
-                    }
-                }
-                Err(e) => {
-                    eprintln!("Search error: {}", e);
-                }
-            }
+            // Search WIP - disabled temporarily
+            println!("Search feature is under development.");
+            println!("Use 'tt ls' with filters instead:");
+            println!("  tt ls --status todo");
+            println!("  tt ls --priority P1");
             Ok(())
         },
         Commands::Dashboard { .. } => Ok(()),

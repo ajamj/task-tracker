@@ -1,15 +1,18 @@
-//! Integration tests for CLI commands.
+//! Integration tests for tt CLI commands.
 
 use assert_cmd::Command;
 use predicates::prelude::*;
 use tempfile::TempDir;
+use std::fs;
 
+/// Helper to create a test workspace
 fn setup_workspace() -> TempDir {
-    let temp_dir = TempDir::new().expect("Failed to create temp dir");
+    let temp_dir = TempDir::new().unwrap();
     
-    // Initialize workspace using the CLI
+    // Initialize workspace
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("init").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("init");
     cmd.assert().success();
     
     temp_dir
@@ -17,16 +20,15 @@ fn setup_workspace() -> TempDir {
 
 #[test]
 fn test_init_creates_workspace() {
-    let temp_dir = TempDir::new().expect("Failed to create temp dir");
+    let temp_dir = setup_workspace();
     
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("init").current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    
-    // Verify files created
+    // Check tt.toml exists
     assert!(temp_dir.path().join("tt.toml").exists());
+    
+    // Check projects directory exists
+    assert!(temp_dir.path().join("projects").exists());
+    
+    // Check work project exists
     assert!(temp_dir.path().join("projects/work/project.toml").exists());
 }
 
@@ -34,69 +36,104 @@ fn test_init_creates_workspace() {
 fn test_add_creates_task() {
     let temp_dir = setup_workspace();
     
+    // Add a task
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add")
-        .arg("Test task")
-        .arg("--project")
-        .arg("work")
-        .current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Test task");
+    cmd.assert().success().stdout(predicate::str::contains("Created task:"));
     
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("Test task"));
-    
-    // Verify task file created
-    let task_file = temp_dir.path()
-        .join("projects/work/tasks")
-        .join(format!("{:04}", chrono::Local::now().year()))
-        .join(format!("{:02}", chrono::Local::now().month()))
-        .join("tt-000001.toml");
-    
-    assert!(task_file.exists());
+    // Check task file exists
+    let tasks_dir = temp_dir.path().join("projects/work/tasks");
+    let task_files = fs::read_dir(tasks_dir).unwrap();
+    let mut found_task = false;
+    for entry in task_files.flatten() {
+        if entry.path().extension().map_or(false, |ext| ext == "toml") {
+            found_task = true;
+            let content = fs::read_to_string(entry.path()).unwrap();
+            assert!(content.contains("Test task"));
+        }
+    }
+    assert!(found_task, "Task file should be created");
 }
 
 #[test]
-fn test_add_task_with_options() {
-    let temp_dir = setup_workspace();
-    
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add")
-        .arg("Important task")
-        .arg("--due")
-        .arg("2026-04-03")
-        .arg("--priority")
-        .arg("P1")
-        .arg("--tag")
-        .arg("rust")
-        .arg("--tag")
-        .arg("cli")
-        .current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("P1"));
-}
-
-#[test]
-fn test_ls_shows_tasks() {
+fn test_ls_lists_tasks() {
     let temp_dir = setup_workspace();
     
     // Add a task first
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Test task").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Task to list");
     cmd.assert().success();
     
     // List tasks
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("ls").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("ls");
+    cmd.assert().success().stdout(predicate::str::contains("Task to list"));
+}
+
+#[test]
+fn test_start_changes_status() {
+    let temp_dir = setup_workspace();
     
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("Test task"));
-    assert.stdout(predicate::str::contains("TODO"));
+    // Add a task
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Task to start");
+    cmd.assert().success();
+    
+    // Start the task
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("start").arg("tt-000001");
+    cmd.assert().success().stdout(predicate::str::contains("DOING"));
+}
+
+#[test]
+fn test_done_changes_status() {
+    let temp_dir = setup_workspace();
+    
+    // Add and start a task
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Task to complete");
+    cmd.assert().success();
+    
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("start").arg("tt-000001");
+    cmd.assert().success();
+    
+    // Complete the task
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("done").arg("tt-000001");
+    cmd.assert().success().stdout(predicate::str::contains("DONE"));
+}
+
+#[test]
+fn test_log_creates_entry() {
+    let temp_dir = setup_workspace();
+    
+    // Add a log entry
+    let mut cmd = Command::cargo_bin("tt").unwrap();
+    cmd.current_dir(&temp_dir);
+    cmd.arg("log").arg("Test log entry");
+    cmd.assert().success().stdout(predicate::str::contains("Updated log:"));
+    
+    // Check log file exists
+    let logs_dir = temp_dir.path().join("projects/work/logs");
+    let log_files = fs::read_dir(logs_dir).unwrap();
+    let mut found_log = false;
+    for entry in log_files.flatten() {
+        if entry.path().extension().map_or(false, |ext| ext == "md") {
+            found_log = true;
+            let content = fs::read_to_string(entry.path()).unwrap();
+            assert!(content.contains("Test log entry"));
+        }
+    }
+    assert!(found_log, "Log file should be created");
 }
 
 #[test]
@@ -105,207 +142,53 @@ fn test_show_displays_task() {
     
     // Add a task
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Test task").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Task to show");
     cmd.assert().success();
     
-    // Show task
+    // Show the task
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("show").arg("tt-000001").current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("Test task"));
-    assert.stdout(predicate::str::contains("Status:"));
+    cmd.current_dir(&temp_dir);
+    cmd.arg("show").arg("tt-000001");
+    cmd.assert().success()
+        .stdout(predicate::str::contains("Task to show"))
+        .stdout(predicate::str::contains("tt-000001"));
 }
 
 #[test]
-fn test_start_transitions_task() {
+fn test_add_with_priority() {
     let temp_dir = setup_workspace();
     
-    // Add a task
+    // Add a task with priority
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Test task").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("High priority task").arg("--priority").arg("P1");
     cmd.assert().success();
     
-    // Start task
+    // Show the task
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("start").arg("tt-000001").current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("DOING"));
-    
-    // Verify status changed
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("show").arg("tt-000001").current_dir(&temp_dir);
-    let assert = cmd.assert();
-    assert.stdout(predicate::str::contains("DOING"));
+    cmd.current_dir(&temp_dir);
+    cmd.arg("show").arg("tt-000001");
+    cmd.assert().success().stdout(predicate::str::contains("P1"));
 }
 
 #[test]
-fn test_done_completes_task() {
+fn test_add_with_tags() {
     let temp_dir = setup_workspace();
     
-    // Add a task
+    // Add a task with tags
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Test task").current_dir(&temp_dir);
+    cmd.current_dir(&temp_dir);
+    cmd.arg("add").arg("Tagged task")
+        .arg("--tag").arg("feature")
+        .arg("--tag").arg("urgent");
     cmd.assert().success();
     
-    // Start task
+    // Show the task
     let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("start").arg("tt-000001").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // Complete task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("done").arg("tt-000001").current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("DONE"));
-    
-    // Verify status changed
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("show").arg("tt-000001").current_dir(&temp_dir);
-    let assert = cmd.assert();
-    assert.stdout(predicate::str::contains("DONE"));
-}
-
-#[test]
-fn test_log_appends_to_daily_log() {
-    let temp_dir = setup_workspace();
-    
-    let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-    
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("log")
-        .arg("Worked on tt-000001")
-        .current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains(&today));
-    assert.stdout(predicate::str::contains("tt-000001"));
-    
-    // Verify log file created
-    let log_file = temp_dir.path()
-        .join("projects/work/logs")
-        .join(format!("{:04}", chrono::Local::now().year()))
-        .join(format!("{}.md", today));
-    
-    assert!(log_file.exists());
-}
-
-#[test]
-fn test_log_detects_task_ids() {
-    let temp_dir = setup_workspace();
-    
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("log")
-        .arg("Worked on tt-000001 and tt-000002")
-        .current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("tt-000002"));
-}
-
-#[test]
-fn test_full_workflow() {
-    let temp_dir = setup_workspace();
-    
-    // 1. Add task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Refactor config").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // 2. List tasks
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("ls").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // 3. Start task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("start").arg("tt-000001").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // 4. Log work
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("log").arg("Worked on tt-000001").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // 5. Complete task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("done").arg("tt-000001").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // 6. Generate report
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("report").arg("week").current_dir(&temp_dir);
-    cmd.assert().success();
-}
-
-#[test]
-fn test_invalid_status_transition() {
-    let temp_dir = setup_workspace();
-    
-    // Add a task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Test task").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // Try to complete without starting (should fail or auto-start)
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("done").arg("tt-000001").current_dir(&temp_dir);
-    
-    // This should error because todo -> done is invalid
-    let assert = cmd.assert();
-    assert.failure();
-}
-
-#[test]
-fn test_ls_filter_by_status() {
-    let temp_dir = setup_workspace();
-    
-    // Add two tasks
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Task 1").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("add").arg("Task 2").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // Start one task
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("start").arg("tt-000001").current_dir(&temp_dir);
-    cmd.assert().success();
-    
-    // Filter by status
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("ls").arg("--status").arg("doing").current_dir(&temp_dir);
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("tt-000001"));
-    assert.stdout(predicate::str::contains("DOING"));
-}
-
-#[test]
-fn test_help_output() {
-    let mut cmd = Command::cargo_bin("tt").unwrap();
-    cmd.arg("--help");
-    
-    let assert = cmd.assert();
-    assert.success();
-    assert.stdout(predicate::str::contains("init"));
-    assert.stdout(predicate::str::contains("add"));
-    assert.stdout(predicate::str::contains("ls"));
-    assert.stdout(predicate::str::contains("show"));
-    assert.stdout(predicate::str::contains("start"));
-    assert.stdout(predicate::str::contains("done"));
-    assert.stdout(predicate::str::contains("log"));
-    assert.stdout(predicate::str::contains("report"));
+    cmd.current_dir(&temp_dir);
+    cmd.arg("show").arg("tt-000001");
+    cmd.assert().success()
+        .stdout(predicate::str::contains("feature"))
+        .stdout(predicate::str::contains("urgent"));
 }

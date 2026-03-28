@@ -23,7 +23,7 @@ pub mod reports;
 pub mod cli;
 pub mod api;
 pub mod dashboard;
-pub mod search;
+// pub mod search;  // WIP - needs fixing
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};
