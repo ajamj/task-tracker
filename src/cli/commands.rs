@@ -8,6 +8,7 @@ use crate::cli::format::{format_task, format_task_list, GitSuggestion};
 use crate::error::{Result, TtError};
 use crate::models::{NewTask, Priority, TaskStatus, WeekRange};
 use crate::storage::{LogStorage, TaskStorage, Workspace};
+// use crate::search::{SearchIndex, SearchFilters, query::format_results};  // Disabled
 
 /// Execute a CLI command.
 pub fn execute(command: Commands) -> Result<()> {

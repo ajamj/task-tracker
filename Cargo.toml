@@ -56,8 +56,8 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # Utilities
 slug = "0.1"
 
-# Search
-tantivy = "0.21"
+# Search (temporarily disabled due to zstd dependency conflict)
+# tantivy = { version = "0.20", default-features = false, features = ["mmap"] }
 
 [dev-dependencies]
 # Snapshot testing

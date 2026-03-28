@@ -21,7 +21,7 @@ pub mod models;
 pub mod storage;
 pub mod reports;
 pub mod cli;
-pub mod search;
+// pub mod search;  // Temporarily disabled due to tantivy dependency conflict
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};
