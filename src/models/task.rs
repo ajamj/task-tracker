@@ -93,6 +93,12 @@ impl Priority {
     }
 }
 
+impl fmt::Display for Priority {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display())
+    }
+}
+
 /// Git suggestions for a task.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct GitSuggestions {
