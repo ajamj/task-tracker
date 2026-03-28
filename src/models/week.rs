@@ -2,9 +2,10 @@
 
 use chrono::{Datelike, Duration, NaiveDate};
 use regex::Regex;
+use serde::Serialize;
 
 /// A week range with Monday start and Sunday end.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct WeekRange {
     /// Monday (start of week).
     pub start: NaiveDate,

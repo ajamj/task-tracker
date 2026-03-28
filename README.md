@@ -2,8 +2,41 @@
 
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/tt.svg)](https://crates.io/crates/tt)
+[![GitHub Release](https://img.shields.io/github/v/release/yourusername/tt)](https://github.com/yourusername/tt/releases)
 
 **tt** is a local-first, plain-text task tracking CLI tool written in Rust. It stores tasks in TOML files and daily logs in Markdown, all within a dedicated Git repository. Generate weekly reports and get git commit/branch suggestions (but tt never executes git commands automatically).
+
+## Installation
+
+### From crates.io (Recommended)
+
+```bash
+cargo install tt
+```
+
+### From GitHub Releases
+
+Download the latest binary for your platform from [GitHub Releases](https://github.com/yourusername/tt/releases):
+
+- **Linux**: `tt-linux-amd64.tar.gz`
+- **macOS**: `tt-macos-amd64.tar.gz`
+- **Windows**: `tt-windows-amd64.tar.gz`
+
+Extract and add to your PATH.
+
+### From Source
+
+```bash
+git clone https://github.com/yourusername/tt
+cd tt
+cargo install --path .
+```
+
+### Verify Installation
+
+```bash
+tt --version
+```
 
 ## Features
 

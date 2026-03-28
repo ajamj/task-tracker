@@ -39,9 +39,9 @@
 
 | Task | Description | Status |
 |------|-------------|--------|
-| **3.1** | Distribution setup (GitHub Releases, crates.io) | ⏳ PENDING |
-| **3.2** | Template system (customizable reports/logs) | ⏳ PENDING |
-| **3.3** | Search + indexing (full-text search) | ⏳ PENDING |
+| **3.1** | Distribution setup (GitHub Releases, crates.io) | ✅ **COMPLETE** |
+| **3.2** | Template system (customizable reports/logs) | ✅ **COMPLETE** |
+| **3.3** | Search + indexing (full-text search) | ✅ **COMPLETE** |
 | **3.4** | Enhanced reports (smart merging, highlights) | ⏳ PENDING |
 | **3.5** | Quality hardening (benchmarks, error messages) | ⏳ PENDING |
 

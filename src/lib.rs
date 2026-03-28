@@ -21,6 +21,7 @@ pub mod models;
 pub mod storage;
 pub mod reports;
 pub mod cli;
+pub mod search;
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};

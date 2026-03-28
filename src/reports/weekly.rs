@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use crate::error::{Result, TtError};
 use crate::models::{Task, TaskStatus, WeekRange};
+use crate::reports::templates::TemplateType;
 use crate::storage::{Log, LogStorage, Project, TaskStorage};
 
 /// Weekly report data.

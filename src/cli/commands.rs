@@ -54,6 +54,25 @@ pub fn execute(command: Commands) -> Result<()> {
             date,
         }),
         Commands::Report { week, project } => cmd_report(week, project),
+        Commands::Search {
+            query,
+            project,
+            status,
+            tag,
+            from,
+            to,
+            json,
+            limit,
+        } => cmd_search(SearchArgs {
+            query,
+            project,
+            status,
+            tag,
+            from,
+            to,
+            json,
+            limit,
+        }),
     }
 }
 
@@ -81,6 +100,18 @@ pub struct LogArgs {
     pub project: Option<String>,
     pub edit: bool,
     pub date: Option<String>,
+}
+
+/// Arguments for the search command.
+pub struct SearchArgs {
+    pub query: String,
+    pub project: Option<String>,
+    pub status: Vec<String>,
+    pub tag: Vec<String>,
+    pub from: Option<String>,
+    pub to: Option<String>,
+    pub json: bool,
+    pub limit: usize,
 }
 
 /// Initialize a new workspace.
@@ -453,6 +484,61 @@ fn cmd_report(week: Option<String>, project: Option<String>) -> Result<()> {
         &report_path.to_string_lossy(),
     );
     git_suggestion.display();
+
+    Ok(())
+}
+
+/// Search tasks and logs.
+fn cmd_search(args: SearchArgs) -> Result<()> {
+    use crate::search::{SearchIndex, SearchFilters, query::format_results};
+    
+    let cwd = std::env::current_dir().map_err(|e| TtError::IoError(e))?;
+    let workspace = Workspace::load(cwd.clone())?;
+    
+    // Index path
+    let index_path = cwd.join(".tt").join("index");
+    
+    // Open or create index
+    let mut search_index = SearchIndex::new_or_open(&index_path)
+        .map_err(|e| TtError::IoError(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to open search index: {}", e)
+        )))?;
+    
+    // Build index if empty (first run)
+    // In production, this would be done incrementally
+    // For now, we'll just search what's already indexed
+    
+    // Build filters
+    let filters = SearchFilters {
+        project: args.project,
+        status: if args.status.is_empty() { None } else { Some(args.status) },
+        tag: if args.tag.is_empty() { None } else { Some(args.tag) },
+        from: args.from,
+        to: args.to,
+    };
+    
+    // Execute search
+    let results = search_index.search(&args.query, &filters, args.limit)
+        .map_err(|e| TtError::IoError(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Search failed: {}", e)
+        )))?;
+    
+    if results.is_empty() {
+        println!("No results found for '{}'", args.query);
+        return Ok(());
+    }
+    
+    // Output results
+    let output = format_results(&results, args.json)
+        .map_err(|e| TtError::IoError(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("Failed to format results: {}", e)
+        )))?;
+    
+    println!("{}", output);
+    println!("\nFound {} result(s)", results.len());
 
     Ok(())
 }

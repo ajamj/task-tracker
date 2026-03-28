@@ -6,9 +6,8 @@
 //! - Graceful fallback to embedded templates on errors
 
 use include_dir::{include_dir, Dir};
-use minijinja::{Environment, Error as JinjaError};
+use minijinja::Environment;
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
 
 use crate::error::{Result, TtError};
 use crate::models::config::WorkspaceConfig;
@@ -105,9 +104,9 @@ pub fn load_template(
         tracing::debug!("Using embedded template for: {:?}", template_type);
         Ok(content)
     } else {
-        Err(TtError::TemplateError(format!(
-            "Embedded template not found: {:?}",
-            template_type
+        Err(TtError::TemplateError(minijinja::Error::new(
+            minijinja::ErrorKind::InvalidOperation,
+            "Embedded template not found",
         )))
     }
 }
@@ -132,13 +131,9 @@ pub fn render_template<T: serde::Serialize>(
         strings.join(&sep)
     });
 
-    match env.render_str(template_content, ctx) {
-        Ok(rendered) => Ok(rendered),
-        Err(e) => Err(TtError::TemplateError(format!(
-            "Template rendering error: {}",
-            e
-        ))),
-    }
+    env.render_str(template_content, ctx).map_err(|e| {
+        TtError::TemplateError(e)
+    })
 }
 
 /// Load and render a template with graceful fallback.
@@ -171,11 +166,10 @@ pub fn load_and_render_template<T: serde::Serialize>(
 /// Validate a template string.
 ///
 /// Returns Ok(()) if the template is valid, Err otherwise.
-pub fn validate_template(template_content: &str) -> std::result::Result<(), JinjaError> {
+pub fn validate_template(template_content: &str) -> std::result::Result<(), minijinja::Error> {
     let env = Environment::new();
     env.render_str(template_content, &serde_json::Value::Null)
         .map(|_| ())
-        .unwrap_or_else(|e| Err(e))
 }
 
 #[cfg(test)]

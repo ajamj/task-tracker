@@ -125,6 +125,41 @@ pub enum Commands {
         #[arg(long, short)]
         project: Option<String>,
     },
+
+    /// Search tasks and logs
+    Search {
+        /// Search query
+        #[arg(required = true)]
+        query: String,
+
+        /// Filter by project
+        #[arg(long, short)]
+        project: Option<String>,
+
+        /// Filter by status (can be used multiple times)
+        #[arg(long, short)]
+        status: Vec<String>,
+
+        /// Filter by tag (can be used multiple times)
+        #[arg(long, short = 't')]
+        tag: Vec<String>,
+
+        /// Filter by date range (from, YYYY-MM-DD)
+        #[arg(long, short)]
+        from: Option<String>,
+
+        /// Filter by date range (to, YYYY-MM-DD)
+        #[arg(long, short)]
+        to: Option<String>,
+
+        /// Output as JSON
+        #[arg(long)]
+        json: bool,
+
+        /// Maximum results
+        #[arg(long, short, default_value = "20")]
+        limit: usize,
+    },
 }
 
 impl Cli {

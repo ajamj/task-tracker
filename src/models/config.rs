@@ -141,6 +141,8 @@ impl Default for ReportsConfig {
             track_in_git: default_true(),
             weekly_dir: default_weekly_dir(),
             template: default_template(),
+            template_path: None,
+            log_template_path: None,
         }
     }
 }
