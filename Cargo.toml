@@ -57,6 +57,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # Utilities
 slug = "0.1"
 
+# Pin getrandom to avoid edition2024 requirement
+getrandom = "=0.2.15"
+
 # Web framework (Dashboard)
 axum = "0.7"
 tokio = { version = "1.36", features = ["full"] }
