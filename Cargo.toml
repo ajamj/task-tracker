@@ -67,3 +67,13 @@ insta = { version = "1.38", features = ["yaml", "json"] }
 tempfile = "3.10"
 assert_cmd = "2.0"
 predicates = "3.1"
+
+# Benchmarks
+criterion = "0.5"
+
+# Property-based testing
+proptest = "1.4"
+
+[[bench]]
+name = "performance"
+harness = false

@@ -4,7 +4,7 @@
 |-------|------|--------|---------|-----------|
 | 01 | MVP (v0.1) — CLI core + git-friendly reports | ✅ implementation-complete | 2026-03-28 | - |
 | 02 | Dashboard + Better UX (v0.2) | ⏳ pending | - | - |
-| 03 | Polish + Distribution (v0.3) | 📋 planning-complete | 2026-03-28 | - |
+| 03 | Polish + Distribution (v0.3) | ✅ execution-complete | 2026-03-28 | 2026-03-28 |
 
 ---
 

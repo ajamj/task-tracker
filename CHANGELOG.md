@@ -24,10 +24,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ISO-8601 week calculations (Monday start)
 - Auto-linking: task ID detection in logs (`tt-XXXXXX` pattern)
 
+## [0.3.0] - 2026-03-28
+
+### Added
+- **Distribution** — GitHub Actions release workflow for Windows, macOS, Linux
+- **Template system** — Customizable weekly report and daily log templates
+- **Full-text search** — `tt search` command with tantivy-based indexing
+- **Enhanced reports** — Smart task mention merging in weekly reports
+- **Better error messages** — Actionable suggestions for all errors
+- **Performance benchmarks** — criterion benchmarks for key operations
+- **Troubleshooting guide** — Comprehensive docs for common issues
+- **Test fixtures** — Large workspace and multi-project test fixtures
+
 ### Changed
+- Error messages now include suggestions for resolution
+- Weekly reports support merged task data with mention dates
+
+### Fixed
 - N/A
 
-### Deprecated
+### Security
+- N/A
+
+## [0.2.0] - 2026-03-28
+
+### Added
+- Template system for reports and logs
+- Search functionality with filters
+
+## [0.1.0] - 2026-03-28
 - N/A
 
 ### Removed
