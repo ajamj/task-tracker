@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tt Dashboard - Task Tracker</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             /* Light Theme */
@@ -76,6 +77,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
         .logo {
@@ -111,14 +114,22 @@
             color: var(--text-secondary);
         }
 
-        /* Theme Toggle */
+        /* Theme Toggle & Actions */
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
         .theme-toggle {
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .theme-btn {
+        .theme-btn,
+        .action-btn {
             width: 44px;
             height: 44px;
             border-radius: 10px;
@@ -133,15 +144,23 @@
             justify-content: center;
         }
 
-        .theme-btn:hover {
+        .theme-btn:hover,
+        .action-btn:hover {
             transform: scale(1.1);
             border-color: var(--primary);
+        }
+
+        .action-btn {
+            font-size: 1rem;
+            width: auto;
+            padding: 0 1rem;
         }
 
         /* Navigation */
         nav {
             display: flex;
             gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         nav a {
@@ -164,6 +183,34 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+        }
+
+        /* View Tabs */
+        .view-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .view-tab {
+            padding: 0.75rem 1.5rem;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .view-tab:hover {
+            border-color: var(--primary);
+        }
+
+        .view-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         /* Filter Bar */
@@ -321,6 +368,267 @@
             font-weight: 500;
         }
 
+        /* Kanban Board */
+        .kanban-board {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kanban-column {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px var(--shadow);
+            min-height: 500px;
+        }
+
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .kanban-header h3 {
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .kanban-count {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .kanban-items {
+            min-height: 400px;
+        }
+
+        .kanban-item {
+            background: var(--hover-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+
+        .kanban-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px -2px var(--shadow);
+        }
+
+        .kanban-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .kanban-item .task-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .kanban-item .task-meta {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 15px -3px var(--shadow);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.125rem;
+        }
+
+        /* Calendar View */
+        .calendar-view {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 15px -3px var(--shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            padding: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .calendar-day {
+            min-height: 100px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .calendar-day:hover {
+            border-color: var(--primary);
+            background: var(--hover-bg);
+        }
+
+        .calendar-day.today {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .calendar-day-tasks {
+            font-size: 0.75rem;
+        }
+
+        .calendar-task-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 0.25rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            background: var(--hover-bg);
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-field {
+            margin-bottom: 1rem;
+        }
+
+        .modal-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .modal-field input,
+        .modal-field select,
+        .modal-field textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .modal-field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
         /* Quick Add Section */
         .quick-add {
             background: var(--card-bg);
@@ -394,6 +702,26 @@
             box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
         }
 
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
         /* Tasks Section */
         .tasks-section {
             background: var(--card-bg);
@@ -427,6 +755,7 @@
             align-items: center;
             gap: 1rem;
             transition: background 0.2s;
+            cursor: pointer;
         }
 
         .task-item:last-child {
@@ -503,17 +832,6 @@
             font-size: 0.875rem;
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--border-color);
-            color: var(--text-secondary);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -551,15 +869,11 @@
         @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
-                gap: 1rem;
             }
 
-            nav {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .stats-grid {
+            .stats-grid,
+            .kanban-board,
+            .charts-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -589,6 +903,10 @@
                 width: 100%;
                 margin-top: 0.75rem;
             }
+
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -603,13 +921,20 @@
                     <p>Git-friendly Task Tracker</p>
                 </div>
             </div>
-            <div style="display: flex; gap: 1rem; align-items: center;">
+            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                 <nav>
-                    <a href="/" class="active">📊 Today</a>
+                    <a href="/" class="active">📊 Dashboard</a>
                     <a href="/tasks">📝 Tasks</a>
                     <a href="/reports">📈 Reports</a>
                 </nav>
-                <div class="theme-toggle">
+                <div class="header-actions">
+                    <button class="action-btn" onclick="exportData()" title="Export Tasks">
+                        📥 Export
+                    </button>
+                    <button class="action-btn" onclick="document.getElementById('import-file').click()" title="Import Tasks">
+                        📤 Import
+                    </button>
+                    <input type="file" id="import-file" accept=".json,.csv" style="display: none;" onchange="importData(event)">
                     <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
                         🌙
                     </button>
@@ -620,6 +945,14 @@
 
     <!-- Main Content -->
     <div class="container">
+        <!-- View Tabs -->
+        <div class="view-tabs">
+            <div class="view-tab active" onclick="switchView('list')">📋 List View</div>
+            <div class="view-tab" onclick="switchView('kanban')">📊 Kanban Board</div>
+            <div class="view-tab" onclick="switchView('calendar')">📅 Calendar</div>
+            <div class="view-tab" onclick="switchView('charts')">📈 Charts</div>
+        </div>
+
         <!-- Filter Bar -->
         <div class="filter-bar">
             <div class="filter-group">
@@ -673,25 +1006,163 @@
             </form>
         </div>
 
-        <!-- Tasks List -->
-        <div class="tasks-section">
-            <div class="section-header">
-                <h2>📝 Recent Tasks</h2>
-                <button class="btn btn-outline btn-sm" hx-get="/api/tasks" hx-target="#task-list">
-                    🔄 Refresh
-                </button>
-            </div>
-            <div id="task-list" hx-get="/api/tasks" hx-trigger="load">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading tasks...</p>
+        <!-- List View -->
+        <div id="list-view">
+            <div class="tasks-section">
+                <div class="section-header">
+                    <h2>📝 Recent Tasks</h2>
+                    <button class="btn btn-outline btn-sm" hx-get="/api/tasks" hx-target="#task-list">
+                        🔄 Refresh
+                    </button>
                 </div>
+                <div id="task-list" hx-get="/api/tasks" hx-trigger="load">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading tasks...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kanban View (Hidden by default) -->
+        <div id="kanban-view" style="display: none;">
+            <div class="kanban-board">
+                <div class="kanban-column" data-status="TODO">
+                    <div class="kanban-header">
+                        <h3>📋 Todo</h3>
+                        <span class="kanban-count" id="todo-count">0</span>
+                    </div>
+                    <div class="kanban-items" id="kanban-todo" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="kanban-column" data-status="DOING">
+                    <div class="kanban-header">
+                        <h3>⏳ Doing</h3>
+                        <span class="kanban-count" id="doing-count">0</span>
+                    </div>
+                    <div class="kanban-items" id="kanban-doing" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="kanban-column" data-status="DONE">
+                    <div class="kanban-header">
+                        <h3>✅ Done</h3>
+                        <span class="kanban-count" id="done-count">0</span>
+                    </div>
+                    <div class="kanban-items" id="kanban-done" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+                <div class="kanban-column" data-status="BLOCKED">
+                    <div class="kanban-header">
+                        <h3>🚫 Blocked</h3>
+                        <span class="kanban-count" id="blocked-count">0</span>
+                    </div>
+                    <div class="kanban-items" id="kanban-blocked" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar View (Hidden by default) -->
+        <div id="calendar-view" style="display: none;">
+            <div class="calendar-view">
+                <div class="calendar-header">
+                    <h2 id="calendar-month-year">March 2026</h2>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-outline btn-sm" onclick="previousMonth()">◀ Prev</button>
+                        <button class="btn btn-outline btn-sm" onclick="nextMonth()">Next ▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts View (Hidden by default) -->
+        <div id="charts-view" style="display: none;">
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>📊 Tasks by Status</h3>
+                    <canvas id="status-chart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>🎯 Tasks by Priority</h3>
+                    <canvas id="priority-chart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>📈 Completion Trend</h3>
+                    <canvas id="trend-chart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>🏷️ Top Tags</h3>
+                    <canvas id="tags-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div class="modal-overlay" id="task-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Task Details</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label>Title</label>
+                    <input type="text" id="modal-task-title" readonly>
+                </div>
+                <div class="modal-field">
+                    <label>ID</label>
+                    <input type="text" id="modal-task-id" readonly>
+                </div>
+                <div class="modal-field">
+                    <label>Status</label>
+                    <select id="modal-task-status" onchange="updateTaskStatus()">
+                        <option value="TODO">Todo</option>
+                        <option value="DOING">Doing</option>
+                        <option value="DONE">Done</option>
+                        <option value="BLOCKED">Blocked</option>
+                    </select>
+                </div>
+                <div class="modal-field">
+                    <label>Priority</label>
+                    <select id="modal-task-priority">
+                        <option value="P0">P0 - Critical</option>
+                        <option value="P1">P1 - High</option>
+                        <option value="P2">P2 - Medium</option>
+                        <option value="P3">P3 - Low</option>
+                    </select>
+                </div>
+                <div class="modal-field">
+                    <label>Due Date</label>
+                    <input type="text" id="modal-task-due" readonly>
+                </div>
+                <div class="modal-field">
+                    <label>Tags</label>
+                    <input type="text" id="modal-task-tags" readonly>
+                </div>
+                <div class="modal-field">
+                    <label>Notes</label>
+                    <textarea id="modal-task-notes" readonly></textarea>
+                </div>
+                <div class="modal-field">
+                    <label>Created</label>
+                    <input type="text" id="modal-task-created" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Close</button>
+                <button class="btn btn-primary" onclick="saveTaskChanges()">Save Changes</button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
     <script>
+        // Global state
+        let allTasks = [];
+        let currentView = 'list';
+        let currentMonth = new Date();
+        let charts = {};
+
         // Theme Toggle
         function toggleTheme() {
             const html = document.documentElement;
@@ -702,8 +1173,8 @@
             html.setAttribute('data-theme', newTheme);
             btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
             
-            // Save preference
             localStorage.setItem('theme', newTheme);
+            updateChartsTheme();
         }
 
         // Load saved theme
@@ -716,9 +1187,33 @@
             btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
         });
 
-        // Task Filtering
-        let allTasks = [];
+        // View Switcher
+        function switchView(view) {
+            currentView = view;
+            
+            // Update tabs
+            document.querySelectorAll('.view-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide views
+            document.getElementById('list-view').style.display = view === 'list' ? 'block' : 'none';
+            document.getElementById('kanban-view').style.display = view === 'kanban' ? 'block' : 'none';
+            document.getElementById('calendar-view').style.display = view === 'calendar' ? 'block' : 'none';
+            document.getElementById('charts-view').style.display = view === 'charts' ? 'block' : 'none';
+            
+            // Load view-specific data
+            if (view === 'kanban') {
+                renderKanban();
+            } else if (view === 'calendar') {
+                renderCalendar();
+            } else if (view === 'charts') {
+                renderCharts();
+            }
+        }
 
+        // Task Filtering
         function filterTasks() {
             const status = document.getElementById('filter-status').value;
             const priority = document.getElementById('filter-priority').value;
@@ -743,6 +1238,7 @@
             }
 
             renderTasks(filtered);
+            if (currentView === 'kanban') renderKanban();
         }
 
         function resetFilters() {
@@ -750,6 +1246,7 @@
             document.getElementById('filter-priority').value = '';
             document.getElementById('filter-search').value = '';
             renderTasks(allTasks);
+            if (currentView === 'kanban') renderKanban();
         }
 
         function renderTasks(tasks) {
@@ -770,7 +1267,7 @@
             let html = '<ul class="task-list">';
             tasks.forEach(task => {
                 html += `
-                    <li class="task-item">
+                    <li class="task-item" onclick="openTaskModal('${task.id}')">
                         <div class="task-checkbox ${task.status === 'DONE' ? 'checked' : ''}"></div>
                         <div class="task-content">
                             <div class="task-title">${task.title}</div>
@@ -791,7 +1288,324 @@
             container.innerHTML = html;
         }
 
-        // HTMX integration for filtering
+        // Kanban Board
+        function renderKanban() {
+            const columns = {
+                TODO: [],
+                DOING: [],
+                DONE: [],
+                BLOCKED: []
+            };
+
+            allTasks.forEach(task => {
+                if (columns[task.status]) {
+                    columns[task.status].push(task);
+                }
+            });
+
+            Object.keys(columns).forEach(status => {
+                const container = document.getElementById(`kanban-${status.toLowerCase()}`);
+                const count = document.getElementById(`${status.toLowerCase()}-count`);
+                
+                count.textContent = columns[status].length;
+                
+                if (columns[status].length === 0) {
+                    container.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No tasks</p>';
+                    return;
+                }
+
+                let html = '';
+                columns[status].forEach(task => {
+                    html += `
+                        <div class="kanban-item" draggable="true" ondragstart="drag(event)" id="${task.id}" onclick="openTaskModal('${task.id}')">
+                            <div class="task-title">${task.title}</div>
+                            <div class="task-meta">
+                                <span class="task-id">${task.id}</span>
+                                <span class="priority-badge priority-${task.priority}">${task.priority}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            });
+        }
+
+        // Drag and Drop
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+            ev.target.classList.add('dragging');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const taskId = ev.dataTransfer.getData("text");
+            const column = ev.target.closest('.kanban-column');
+            
+            if (column) {
+                const newStatus = column.dataset.status;
+                // Update task status via API
+                fetch(`/api/tasks/${taskId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                }).then(() => {
+                    // Refresh data
+                    location.reload();
+                });
+            }
+            
+            document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging'));
+        }
+
+        // Calendar
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            document.getElementById('calendar-month-year').textContent = 
+                currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            
+            // Day headers
+            ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // Calendar days
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startingDay = firstDay.getDay();
+            
+            // Previous month days
+            const prevMonth = new Date(year, month, 0);
+            for (let i = startingDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.style.opacity = '0.5';
+                day.innerHTML = `<div class="calendar-day-number">${prevMonth.getDate() - i}</div>`;
+                grid.appendChild(day);
+            }
+            
+            // Current month days
+            const today = new Date();
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                
+                const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                if (isToday) day.classList.add('today');
+                
+                // Find tasks due on this day
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const tasksOnDay = allTasks.filter(t => t.due === dateStr);
+                
+                let tasksHtml = '';
+                if (tasksOnDay.length > 0) {
+                    tasksHtml = '<div class="calendar-day-tasks">';
+                    tasksOnDay.forEach(task => {
+                        const color = task.status === 'DONE' ? 'var(--success)' : 
+                                     task.status === 'DOING' ? 'var(--warning)' : 
+                                     task.status === 'BLOCKED' ? 'var(--danger)' : 'var(--info)';
+                        tasksHtml += `<span class="calendar-task-dot" style="background: ${color}" title="${task.title}"></span>`;
+                    });
+                    tasksHtml += '</div>';
+                }
+                
+                day.innerHTML = `
+                    <div class="calendar-day-number">${i}</div>
+                    ${tasksHtml}
+                `;
+                grid.appendChild(day);
+            }
+        }
+
+        function previousMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // Charts
+        function renderCharts() {
+            const statusCounts = { TODO: 0, DOING: 0, DONE: 0, BLOCKED: 0 };
+            const priorityCounts = { P0: 0, P1: 0, P2: 0, P3: 0 };
+            const tagCounts = {};
+            
+            allTasks.forEach(task => {
+                statusCounts[task.status] = (statusCounts[task.status] || 0) + 1;
+                priorityCounts[task.priority] = (priorityCounts[task.priority] || 0) + 1;
+                
+                if (task.tags) {
+                    task.tags.forEach(tag => {
+                        tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                    });
+                }
+            });
+            
+            // Status Chart
+            createChart('status-chart', 'doughnut', {
+                labels: ['Todo', 'Doing', 'Done', 'Blocked'],
+                datasets: [{
+                    data: Object.values(statusCounts),
+                    backgroundColor: ['#3b82f6', '#f59e0b', '#10b981', '#ef4444']
+                }]
+            });
+            
+            // Priority Chart
+            createChart('priority-chart', 'bar', {
+                labels: ['P0', 'P1', 'P2', 'P3'],
+                datasets: [{
+                    label: 'Tasks',
+                    data: Object.values(priorityCounts),
+                    backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#64748b']
+                }]
+            });
+            
+            // Trend Chart (mock data)
+            createChart('trend-chart', 'line', {
+                labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                datasets: [{
+                    label: 'Completed',
+                    data: [5, 8, 12, 15],
+                    borderColor: '#10b981',
+                    tension: 0.4
+                }]
+            });
+            
+            // Tags Chart
+            const topTags = Object.entries(tagCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            createChart('tags-chart', 'bar', {
+                labels: topTags.map(t => t[0]),
+                datasets: [{
+                    label: 'Tasks',
+                    data: topTags.map(t => t[1]),
+                    backgroundColor: '#8b5cf6'
+                }]
+            });
+        }
+
+        function createChart(id, type, data) {
+            const ctx = document.getElementById(id).getContext('2d');
+            
+            if (charts[id]) {
+                charts[id].destroy();
+            }
+            
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#f1f5f9' : '#1e293b';
+            
+            charts[id] = new Chart(ctx, {
+                type: type,
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: type !== 'doughnut' ? {
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { color: isDark ? '#334155' : '#e2e8f0' }
+                        },
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: isDark ? '#334155' : '#e2e8f0' }
+                        }
+                    } : {}
+                }
+            });
+        }
+
+        function updateChartsTheme() {
+            if (currentView === 'charts' && charts) {
+                renderCharts();
+            }
+        }
+
+        // Modal
+        function openTaskModal(taskId) {
+            const task = allTasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            document.getElementById('modal-task-title').value = task.title;
+            document.getElementById('modal-task-id').value = task.id;
+            document.getElementById('modal-task-status').value = task.status;
+            document.getElementById('modal-task-priority').value = task.priority;
+            document.getElementById('modal-task-due').value = task.due || 'Not set';
+            document.getElementById('modal-task-tags').value = task.tags ? task.tags.join(', ') : 'None';
+            document.getElementById('modal-task-notes').value = task.notes || 'No notes';
+            document.getElementById('modal-task-created').value = task.created_at;
+            
+            document.getElementById('task-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('task-modal').classList.remove('active');
+        }
+
+        function saveTaskChanges() {
+            const taskId = document.getElementById('modal-task-id').value;
+            const newStatus = document.getElementById('modal-task-status').value;
+            
+            fetch(`/api/tasks/${taskId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            }).then(() => {
+                closeModal();
+                location.reload();
+            });
+        }
+
+        // Export/Import
+        function exportData() {
+            const dataStr = JSON.stringify(allTasks, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `tt-tasks-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    // Import logic would go here
+                    alert(`Imported ${imported.length} tasks! (Implementation pending)`);
+                } catch (err) {
+                    alert('Error importing file. Please check the format.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // HTMX integration
         document.body.addEventListener('htmx:afterSwap', function(event) {
             if (event.detail.target.id === 'stats-grid') {
                 const data = JSON.parse(event.detail.xhr.responseText);
@@ -831,6 +1645,7 @@
                 const data = JSON.parse(event.detail.xhr.responseText);
                 if (data.tasks && data.tasks.length > 0) {
                     renderTasks(data.tasks);
+                    if (currentView === 'kanban') renderKanban();
                 } else {
                     renderTasks([]);
                 }
