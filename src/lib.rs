@@ -21,8 +21,8 @@ pub mod models;
 pub mod storage;
 pub mod reports;
 pub mod cli;
-// pub mod api;  // Dashboard API - disabled for now
-// pub mod dashboard;  // Dashboard UI - disabled for now
+// pub mod api;  // Dashboard API - requires proper axum setup
+// pub mod dashboard;  // Dashboard UI - requires proper axum setup
 // pub mod search;  // Temporarily disabled due to tantivy dependency conflict
 
 // Re-export commonly used types
