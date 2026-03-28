@@ -1,0 +1,26 @@
+# {{ date }} ({{ project }})
+
+## Highlights
+{% for highlight in highlights %}
+- {{ highlight }}
+{% endfor %}
+
+## Done
+{% for item in done %}
+- {{ item }}
+{% endfor %}
+
+## Doing
+{% for item in doing %}
+- {{ item }}
+{% endfor %}
+
+## Blocked
+{% for item in blocked %}
+- {{ item }}
+{% endfor %}
+
+## Notes
+{% for note in notes %}
+- {{ note }}
+{% endfor %}

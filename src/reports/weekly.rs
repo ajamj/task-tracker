@@ -24,6 +24,26 @@ pub struct HighlightDay {
     pub items: Vec<String>,
 }
 
+/// Context data for template rendering.
+#[derive(serde::Serialize)]
+pub struct WeeklyReportContext<'a> {
+    pub week: &'a WeekRange,
+    pub project: &'a str,
+    pub done_tasks: &'a Vec<Task>,
+    pub in_progress_tasks: &'a Vec<Task>,
+    pub blocked_tasks: &'a Vec<Task>,
+    pub mentioned_tasks: &'a HashMap<String, Vec<String>>,
+    pub missing_tasks: &'a HashMap<String, Vec<String>>,
+    pub logs: Vec<LogContext<'a>>,
+}
+
+/// Log context for template rendering.
+#[derive(serde::Serialize)]
+pub struct LogContext<'a> {
+    pub date: &'a str,
+    pub highlights: Vec<String>,
+}
+
 impl WeeklyReport {
     /// Generate a weekly report.
     pub fn generate(
@@ -224,6 +244,64 @@ impl WeeklyReport {
         }
 
         lines.join("\n")
+    }
+
+    /// Build the template context for this report.
+    fn build_context(&self) -> WeeklyReportContext {
+        let logs = self.highlights
+            .iter()
+            .map(|day| LogContext {
+                date: &day.date,
+                highlights: day.items.clone(),
+            })
+            .collect();
+
+        WeeklyReportContext {
+            week: &self.week,
+            project: &self.project,
+            done_tasks: &self.done,
+            in_progress_tasks: &self.in_progress,
+            blocked_tasks: &self.blocked,
+            mentioned_tasks: &self.mentioned,
+            missing_tasks: &self.missing,
+            logs,
+        }
+    }
+
+    /// Render the report using a template.
+    ///
+    /// # Arguments
+    /// * `template_content` - Template string to use
+    ///
+    /// # Returns
+    /// * `Ok(String)` - Rendered report
+    /// * `Err(TtError)` - Template rendering error
+    pub fn render_with_template(&self, template_content: &str) -> Result<String> {
+        let ctx = self.build_context();
+        crate::reports::templates::render_template(template_content, &ctx)
+    }
+
+    /// Render the report using templates from workspace.
+    ///
+    /// # Arguments
+    /// * `workspace_root` - Root directory of the workspace
+    /// * `config` - Workspace configuration
+    ///
+    /// # Returns
+    /// * `Ok(String)` - Rendered report
+    /// * `Err(TtError)` - Template loading/rendering error
+    pub fn render_from_workspace(
+        &self,
+        workspace_root: &std::path::Path,
+        config: &crate::models::config::WorkspaceConfig,
+    ) -> Result<String> {
+        let ctx = self.build_context();
+        crate::reports::templates::load_and_render_template(
+            workspace_root,
+            config,
+            TemplateType::WeeklyReport,
+            &ctx,
+        )
     }
 }
 

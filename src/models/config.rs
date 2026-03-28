@@ -111,6 +111,16 @@ pub struct ReportsConfig {
     /// Template name (reserved for v0.3).
     #[serde(default = "default_template")]
     pub template: String,
+
+    /// Custom weekly report template path (optional).
+    /// Relative to workspace root or absolute path.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub template_path: Option<String>,
+
+    /// Custom daily log template path (optional).
+    /// Relative to workspace root or absolute path.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub log_template_path: Option<String>,
 }
 
 fn default_true() -> bool {
@@ -208,6 +218,8 @@ projects_dir = "projects"
 track_in_git = true
 weekly_dir = "reports/weekly"
 template = "default"
+# template_path = "templates/weekly_report.j2"  # Optional: custom weekly report template
+# log_template_path = "templates/daily_log.j2"  # Optional: custom daily log template
 
 [git]
 suggest_branch = true

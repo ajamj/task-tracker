@@ -1,0 +1,42 @@
+# Weekly Report — {{ week.iso_week }} ({{ project }})
+Range: {{ week.start }} to {{ week.end }}
+
+## Summary
+- Done (by done_at): {{ done_tasks|length }}
+- In progress (current status): {{ in_progress_tasks|length }}
+- Blocked (current status): {{ blocked_tasks|length }}
+- Mentioned in logs: {{ mentioned_tasks|length }}
+- Missing tasks referenced in logs: {{ missing_tasks|length }}
+
+## Done
+{% for task in done_tasks %}
+- {{ task.id }} — {{ task.title }}
+{% endfor %}
+
+## In Progress
+{% for task in in_progress_tasks %}
+- {{ task.id }} — {{ task.title }}
+{% endfor %}
+
+## Blocked
+{% for task in blocked_tasks %}
+- {{ task.id }} — {{ task.title }}{% if task.blocked_reason %} — ({{ task.blocked_reason }}){% endif %}
+{% endfor %}
+
+## Mentioned in Logs
+{% for task_id, dates in mentioned_tasks %}
+- {{ task_id }} — Mentioned on: {{ dates|join(', ') }}
+{% endfor %}
+
+## Missing tasks referenced in logs
+{% for task_id, dates in missing_tasks %}
+- {{ task_id }} — Mentioned on: {{ dates|join(', ') }}
+{% endfor %}
+
+## Worklog Highlights
+{% for log in logs %}
+### {{ log.date }}
+{% for highlight in log.highlights %}
+- {{ highlight }}
+{% endfor %}
+{% endfor %}
