@@ -1,0 +1,187 @@
+warning: unused import: `std::path::PathBuf`
+ --> src\models\config.rs:6:5
+  |
+6 | use std::path::PathBuf;
+  |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Weekday`
+ --> src\models\week.rs:3:45
+  |
+3 | use chrono::{Datelike, Duration, NaiveDate, Weekday};
+  |                                             ^^^^^^^
+
+warning: unused import: `File`
+ --> src\storage\task.rs:3:21
+  |
+3 | use std::fs::{self, File, OpenOptions};
+  |                     ^^^^
+
+warning: unused imports: `Result` and `TtError`
+  --> src\storage\task.rs:10:20
+   |
+10 | use crate::error::{Result, StorageError, StorageResult, TtError};
+   |                    ^^^^^^                               ^^^^^^^
+
+warning: unused import: `Path`
+ --> src\storage\log.rs:4:17
+  |
+4 | use std::path::{Path, PathBuf};
+  |                 ^^^^
+
+warning: unused imports: `Result` and `TtError`
+ --> src\storage\log.rs:6:20
+  |
+6 | use crate::error::{Result, StorageError, StorageResult, TtError};
+  |                    ^^^^^^                               ^^^^^^^
+
+warning: unused import: `std::path::PathBuf`
+ --> src\cli\commands.rs:3:5
+  |
+3 | use std::path::PathBuf;
+  |     ^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::storage::Project`
+ --> src\cli\format.rs:4:5
+  |
+4 | use crate::storage::Project;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: value assigned to `current_section` is never read
+   --> src\reports\weekly.rs:425:31
+    |
+425 |     let mut current_section = String::new();
+    |                               ^^^^^^^^^^^^^
+    |
+    = help: maybe it is overwritten before being read?
+    = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `query`
+  --> src\cli\commands.rs:60:13
+   |
+60 |             query,
+   |             ^^^^^ help: try ignoring the field: `query: _`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `project`
+  --> src\cli\commands.rs:61:13
+   |
+61 |             project,
+   |             ^^^^^^^ help: try ignoring the field: `project: _`
+
+warning: unused variable: `status`
+  --> src\cli\commands.rs:62:13
+   |
+62 |             status,
+   |             ^^^^^^ help: try ignoring the field: `status: _`
+
+warning: unused variable: `tag`
+  --> src\cli\commands.rs:63:13
+   |
+63 |             tag,
+   |             ^^^ help: try ignoring the field: `tag: _`
+
+warning: unused variable: `from`
+  --> src\cli\commands.rs:64:13
+   |
+64 |             from,
+   |             ^^^^ help: try ignoring the field: `from: _`
+
+warning: unused variable: `to`
+  --> src\cli\commands.rs:65:13
+   |
+65 |             to,
+   |             ^^ help: try ignoring the field: `to: _`
+
+warning: unused variable: `json`
+  --> src\cli\commands.rs:66:13
+   |
+66 |             json,
+   |             ^^^^ help: try ignoring the field: `json: _`
+
+warning: unused variable: `limit`
+  --> src\cli\commands.rs:67:13
+   |
+67 |             limit,
+   |             ^^^^^ help: try ignoring the field: `limit: _`
+
+warning: unused variable: `workspace`
+   --> src\cli\commands.rs:118:9
+    |
+118 |     let workspace = Workspace::init(cwd.clone())?;
+    |         ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_workspace`
+
+warning: unused variable: `now`
+   --> src\cli\commands.rs:183:9
+    |
+183 |     let now = Local::now();
+    |         ^^^ help: if this is intentional, prefix it with an underscore: `_now`
+
+warning: unused variable: `project`
+  --> src\cli\format.rs:15:38
+   |
+15 |     pub fn for_task_add(task: &Task, project: &str) -> Self {
+   |                                      ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_project`
+
+warning: unused variable: `project`
+  --> src\cli\format.rs:24:40
+   |
+24 |     pub fn for_task_start(task: &Task, project: &str) -> Self {
+   |                                        ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_project`
+
+warning: unused variable: `project`
+  --> src\cli\format.rs:33:39
+   |
+33 |     pub fn for_task_done(task: &Task, project: &str) -> Self {
+   |                                       ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_project`
+
+warning: unused variable: `suffix`
+   --> src\cli\format.rs:108:18
+    |
+108 |     let (prefix, suffix) = match color {
+    |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_suffix`
+
+warning: hiding a lifetime that's elided elsewhere is confusing
+   --> src\reports\weekly.rs:284:22
+    |
+284 |     fn build_context(&self) -> WeeklyReportContext {
+    |                      ^^^^^     ^^^^^^^^^^^^^^^^^^^ the same lifetime is hidden here
+    |                      |
+    |                      the lifetime is elided here
+    |
+    = help: the same lifetime is referred to in inconsistent ways, making the signature confusing
+    = note: `#[warn(mismatched_lifetime_syntaxes)]` on by default
+help: use `'_` for type paths
+    |
+284 |     fn build_context(&self) -> WeeklyReportContext<'_> {
+    |                                                   ++++
+
+warning: `tt` (lib) generated 24 warnings (run `cargo fix --lib -p tt` to apply 23 suggestions)
+   Compiling tt v0.1.0 (D:\GRC-Ajam\rust-playground)
+warning: unused import: `Commands`
+ --> src\main.rs:4:20
+  |
+4 | use tt::cli::{Cli, Commands, execute};
+  |                    ^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+error[E0521]: borrowed data escapes outside of function
+  --> src\main.rs:46:5
+   |
+38 | fn downcast_tt_error(e: &dyn std::error::Error) -> Option<&TtError> {
+   |                      -  - let's call the lifetime of this reference `'1`
+   |                      |
+   |                      `e` is a reference that is only valid in the function body
+...
+46 |     e.downcast_ref::<TtError>()
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |     |
+   |     `e` escapes the function body here
+   |     argument requires that `'1` must outlive `'static`
+
+For more information about this error, try `rustc --explain E0521`.
+warning: `tt` (bin "tt") generated 1 warning
+error: could not compile `tt` (bin "tt") due to 1 previous error; 1 warning emitted

@@ -1,6 +1,8 @@
 //! Configuration models for workspace and projects.
 
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use std::str::FromStr;
 use std::path::PathBuf;
 
 /// Root workspace configuration (tt.toml).
@@ -226,11 +228,21 @@ template = "default"
 [git]
 suggest_branch = true
 suggest_commit = true
+"#.to_string()
+    }
+}
 
-[editor]
-command = ""
-"#
-        .to_string()
+impl FromStr for WorkspaceConfig {
+    type Err = toml_edit::TomlError;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<Self>()
+    }
+}
+
+impl fmt::Display for WorkspaceConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
@@ -277,6 +289,20 @@ description = ""
     /// Load project config from TOML content.
     pub fn from_str(content: &str) -> Result<Self, toml_edit::TomlError> {
         content.parse::<Self>()
+    }
+}
+
+impl FromStr for ProjectConfig {
+    type Err = toml_edit::TomlError;
+    
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        s.parse::<Self>()
+    }
+}
+
+impl fmt::Display for ProjectConfig {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 

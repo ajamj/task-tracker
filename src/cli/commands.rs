@@ -67,8 +67,9 @@ pub fn execute(command: Commands) -> Result<()> {
             limit,
         } => {
             // Search disabled temporarily
-            println!("Search feature temporarily disabled due to dependency.compatibility issues.");
+            println!("Search feature temporarily disabled due to dependency compatibility issues.");
             println!("Use 'tt ls' to list tasks instead.");
+            Ok(())
         },
     }
 }

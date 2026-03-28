@@ -275,7 +275,7 @@ impl NewTask {
         Task {
             version: 1,
             id: format!("tt-{:06}", id),
-            title: self.title,
+            title: self.title.clone(),
             status: TaskStatus::Todo,
             created_at: now.clone(),
             updated_at: now,

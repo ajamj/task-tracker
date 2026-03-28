@@ -9,6 +9,7 @@ use toml_edit::{DocumentMut, value};
 
 use crate::error::{Result, StorageError, StorageResult, TtError};
 use crate::models::{Task, TaskStatus};
+use chrono::{Datelike, Local};
 
 /// Task storage manager.
 pub struct TaskStorage {
@@ -145,7 +146,7 @@ impl TaskStorage {
     pub fn task_path(&self, task_id: &str) -> PathBuf {
         // Extract year/month from existing tasks or use current date
         // For simplicity, we'll use current date for new tasks
-        let now = chrono::Local::now();
+        let now = Local::now();
         let year = now.year();
         let month = now.month();
 
@@ -189,8 +190,8 @@ fn task_to_document(task: &Task) -> DocumentMut {
     }
 
     if !task.tags.is_empty() {
-        let tags: Vec<&str> = task.tags.iter().map(|s| s.as_str()).collect();
-        doc["tags"] = value(tags);
+        let tags_array = toml_edit::Array::from_iter(task.tags.iter().cloned());
+        doc["tags"] = value(toml_edit::Value::Array(tags_array));
     }
 
     if !task.notes.is_empty() {
@@ -220,7 +221,10 @@ fn task_to_document(task: &Task) -> DocumentMut {
         if !task.git_suggestions.commit_done.is_empty() {
             git_doc["commit_done"] = value(&task.git_suggestions.commit_done);
         }
-        doc["git_suggestions"] = toml_edit::Item::Table(git_doc.into_table().unwrap());
+        let git_table = git_doc.into_table();
+        let mut git_item = toml_edit::Item::Table(git_table);
+        git_item.as_table_mut().unwrap().set_implicit(false);
+        doc["git_suggestions"] = git_item;
     }
 
     doc

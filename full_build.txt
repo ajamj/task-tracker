@@ -77,61 +77,10 @@ error[E0308]: mismatched types
    = note:   expected enum `std::result::Result<(), TtError>`
            found unit type `()`
 
-error[E0382]: borrow of moved value: `self.title`
-   --> src\models\task.rs:292:67
-    |
-278 |             title: self.title,
-    |                    ---------- value moved here
-...
-292 |                 commit_add: format!("task(add): tt-{:06} {}", id, self.title),
-    |                                                                   ^^^^^^^^^^ value borrowed here after move
-    |
-    = note: move occurs because `self.title` has type `std::string::String`, which does not implement the `Copy` trait
-    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error[E0515]: cannot return value referencing temporary value
-   --> src\reports\weekly.rs:296:22
-    |
-296 |               .map(|t| TaskWithMentionsContext {
-    |  ______________________^
-297 | |                 id: &t.task.id,
-298 | |                 title: &t.task.title,
-299 | |                 status: &t.task.status.to_string(),
-    | |                          ------------------------- temporary value created here
-300 | |                 mention_dates: &t.mention_dates,
-301 | |             })
-    | |_____________^ returns a value referencing data owned by the current function
-
-error[E0515]: cannot return value referencing temporary value
-   --> src\reports\weekly.rs:306:22
-    |
-306 |               .map(|t| TaskWithMentionsContext {
-    |  ______________________^
-307 | |                 id: &t.task.id,
-308 | |                 title: &t.task.title,
-309 | |                 status: &t.task.status.to_string(),
-    | |                          ------------------------- temporary value created here
-310 | |                 mention_dates: &t.mention_dates,
-311 | |             })
-    | |_____________^ returns a value referencing data owned by the current function
-
-error[E0515]: cannot return value referencing temporary value
-   --> src\reports\weekly.rs:316:22
-    |
-316 |               .map(|t| TaskWithMentionsContext {
-    |  ______________________^
-317 | |                 id: &t.task.id,
-318 | |                 title: &t.task.title,
-319 | |                 status: &t.task.status.to_string(),
-    | |                          ------------------------- temporary value created here
-320 | |                 mention_dates: &t.mention_dates,
-321 | |             })
-    | |_____________^ returns a value referencing data owned by the current function
-
 warning: value assigned to `current_section` is never read
-   --> src\reports\weekly.rs:416:31
+   --> src\reports\weekly.rs:425:31
     |
-416 |     let mut current_section = String::new();
+425 |     let mut current_section = String::new();
     |                               ^^^^^^^^^^^^^
     |
     = help: maybe it is overwritten before being read?
@@ -175,7 +124,6 @@ warning: unused variable: `suffix`
 108 |     let (prefix, suffix) = match color {
     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_suffix`
 
-Some errors have detailed explanations: E0308, E0382, E0515.
-For more information about an error, try `rustc --explain E0308`.
+For more information about this error, try `rustc --explain E0308`.
 warning: `tt` (lib) generated 15 warnings
-error: could not compile `tt` (lib) due to 6 previous errors; 15 warnings emitted
+error: could not compile `tt` (lib) due to 2 previous errors; 15 warnings emitted

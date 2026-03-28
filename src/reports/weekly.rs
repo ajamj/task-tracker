@@ -49,18 +49,18 @@ pub struct WeeklyReportContext<'a> {
     pub missing_tasks: &'a HashMap<String, Vec<String>>,
     pub logs: Vec<LogContext<'a>>,
     /// Merged tasks with mention dates (for smart merging in templates)
-    pub merged_done_tasks: Vec<TaskWithMentionsContext<'a>>,
-    pub merged_in_progress_tasks: Vec<TaskWithMentionsContext<'a>>,
-    pub merged_blocked_tasks: Vec<TaskWithMentionsContext<'a>>,
+    pub merged_done_tasks: Vec<TaskWithMentionsContext>,
+    pub merged_in_progress_tasks: Vec<TaskWithMentionsContext>,
+    pub merged_blocked_tasks: Vec<TaskWithMentionsContext>,
 }
 
 /// Task with mentions context for template rendering
 #[derive(serde::Serialize)]
-pub struct TaskWithMentionsContext<'a> {
-    pub id: &'a str,
-    pub title: &'a str,
-    pub status: &'a str,
-    pub mention_dates: &'a Vec<String>,
+pub struct TaskWithMentionsContext {
+    pub id: String,
+    pub title: String,
+    pub status: String,
+    pub mention_dates: Vec<String>,
 }
 
 /// Log context for template rendering.
@@ -293,31 +293,40 @@ impl WeeklyReport {
         // Build merged task contexts
         let merged_done_tasks = self.merged_done
             .iter()
-            .map(|t| TaskWithMentionsContext {
-                id: &t.task.id,
-                title: &t.task.title,
-                status: &t.task.status.to_string(),
-                mention_dates: &t.mention_dates,
+            .map(|t| {
+                let status_str = t.task.status.to_string();
+                TaskWithMentionsContext {
+                    id: t.task.id.clone(),
+                    title: t.task.title.clone(),
+                    status: status_str,
+                    mention_dates: t.mention_dates.clone(),
+                }
             })
             .collect();
 
         let merged_in_progress_tasks = self.merged_in_progress
             .iter()
-            .map(|t| TaskWithMentionsContext {
-                id: &t.task.id,
-                title: &t.task.title,
-                status: &t.task.status.to_string(),
-                mention_dates: &t.mention_dates,
+            .map(|t| {
+                let status_str = t.task.status.to_string();
+                TaskWithMentionsContext {
+                    id: t.task.id.clone(),
+                    title: t.task.title.clone(),
+                    status: status_str,
+                    mention_dates: t.mention_dates.clone(),
+                }
             })
             .collect();
 
         let merged_blocked_tasks = self.merged_blocked
             .iter()
-            .map(|t| TaskWithMentionsContext {
-                id: &t.task.id,
-                title: &t.task.title,
-                status: &t.task.status.to_string(),
-                mention_dates: &t.mention_dates,
+            .map(|t| {
+                let status_str = t.task.status.to_string();
+                TaskWithMentionsContext {
+                    id: t.task.id.clone(),
+                    title: t.task.title.clone(),
+                    status: status_str,
+                    mention_dates: t.mention_dates.clone(),
+                }
             })
             .collect();
 

@@ -1,6 +1,6 @@
 //! Week range calculations with ISO-8601 Monday start.
 
-use chrono::{Datelike, Duration, NaiveDate};
+use chrono::{Datelike, Duration, NaiveDate, Weekday};
 use regex::Regex;
 use serde::Serialize;
 
@@ -39,14 +39,13 @@ impl WeekRange {
         let days_since_monday = weekday.num_days_from_monday();
         let start = date - Duration::days(days_since_monday as i64);
         let end = start + Duration::days(6);
-        let iso_week = date.iso_week();
 
         Self {
             start,
             end,
-            iso_week: format!("{}-W{:02}", iso_week.year(), iso_week.week()),
-            year: iso_week.year(),
-            week: iso_week.week(),
+            iso_week: format!("{}-W{:02}", date.year(), date.iso_week().week()),
+            year: date.year(),
+            week: date.iso_week().week(),
         }
     }
 
