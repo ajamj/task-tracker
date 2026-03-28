@@ -1,4 +1,4 @@
-//! Weekly report generation.
+//! Weekly report generation with smart task mention merging.
 
 use std::collections::HashMap;
 
@@ -7,7 +7,7 @@ use crate::models::{Task, TaskStatus, WeekRange};
 use crate::reports::templates::TemplateType;
 use crate::storage::{Log, LogStorage, Project, TaskStorage};
 
-/// Weekly report data.
+/// Weekly report data with smart merging.
 pub struct WeeklyReport {
     pub week: WeekRange,
     pub project: String,
@@ -17,6 +17,18 @@ pub struct WeeklyReport {
     pub mentioned: HashMap<String, Vec<String>>, // task_id -> [dates]
     pub missing: HashMap<String, Vec<String>>,   // task_id -> [dates] (no TOML file)
     pub highlights: Vec<HighlightDay>,
+    /// Merged tasks: tasks with their mention dates from logs
+    /// This enables "smart merging" where mentioned tasks show log dates
+    pub merged_done: Vec<TaskWithMentions>,
+    pub merged_in_progress: Vec<TaskWithMentions>,
+    pub merged_blocked: Vec<TaskWithMentions>,
+}
+
+/// A task with its mention dates from logs (for smart merging)
+#[derive(Clone, serde::Serialize)]
+pub struct TaskWithMentions {
+    pub task: Task,
+    pub mention_dates: Vec<String>,
 }
 
 /// Highlights for a single day.
@@ -25,7 +37,7 @@ pub struct HighlightDay {
     pub items: Vec<String>,
 }
 
-/// Context data for template rendering.
+/// Context data for template rendering with smart merging support.
 #[derive(serde::Serialize)]
 pub struct WeeklyReportContext<'a> {
     pub week: &'a WeekRange,
@@ -36,6 +48,19 @@ pub struct WeeklyReportContext<'a> {
     pub mentioned_tasks: &'a HashMap<String, Vec<String>>,
     pub missing_tasks: &'a HashMap<String, Vec<String>>,
     pub logs: Vec<LogContext<'a>>,
+    /// Merged tasks with mention dates (for smart merging in templates)
+    pub merged_done_tasks: Vec<TaskWithMentionsContext<'a>>,
+    pub merged_in_progress_tasks: Vec<TaskWithMentionsContext<'a>>,
+    pub merged_blocked_tasks: Vec<TaskWithMentionsContext<'a>>,
+}
+
+/// Task with mentions context for template rendering
+#[derive(serde::Serialize)]
+pub struct TaskWithMentionsContext<'a> {
+    pub id: &'a str,
+    pub title: &'a str,
+    pub status: &'a str,
+    pub mention_dates: &'a Vec<String>,
 }
 
 /// Log context for template rendering.
@@ -134,6 +159,11 @@ impl WeeklyReport {
         // Extract highlights
         let highlights = extract_highlights(&logs);
 
+        // Smart merging: merge mentioned tasks into Done/In Progress/Blocked sections
+        let merged_done = merge_tasks_with_mentions(&done, &mentioned);
+        let merged_in_progress = merge_tasks_with_mentions(&in_progress, &mentioned);
+        let merged_blocked = merge_tasks_with_mentions(&blocked, &mentioned);
+
         Ok(Self {
             week: week.clone(),
             project: project.slug.clone(),
@@ -143,6 +173,9 @@ impl WeeklyReport {
             mentioned,
             missing,
             highlights,
+            merged_done,
+            merged_in_progress,
+            merged_blocked,
         })
     }
 
@@ -247,13 +280,44 @@ impl WeeklyReport {
         lines.join("\n")
     }
 
-    /// Build the template context for this report.
+    /// Build the template context for this report with smart merging support.
     fn build_context(&self) -> WeeklyReportContext {
         let logs = self.highlights
             .iter()
             .map(|day| LogContext {
                 date: &day.date,
                 highlights: day.items.clone(),
+            })
+            .collect();
+
+        // Build merged task contexts
+        let merged_done_tasks = self.merged_done
+            .iter()
+            .map(|t| TaskWithMentionsContext {
+                id: &t.task.id,
+                title: &t.task.title,
+                status: &t.task.status.to_string(),
+                mention_dates: &t.mention_dates,
+            })
+            .collect();
+
+        let merged_in_progress_tasks = self.merged_in_progress
+            .iter()
+            .map(|t| TaskWithMentionsContext {
+                id: &t.task.id,
+                title: &t.task.title,
+                status: &t.task.status.to_string(),
+                mention_dates: &t.mention_dates,
+            })
+            .collect();
+
+        let merged_blocked_tasks = self.merged_blocked
+            .iter()
+            .map(|t| TaskWithMentionsContext {
+                id: &t.task.id,
+                title: &t.task.title,
+                status: &t.task.status.to_string(),
+                mention_dates: &t.mention_dates,
             })
             .collect();
 
@@ -266,6 +330,9 @@ impl WeeklyReport {
             mentioned_tasks: &self.mentioned,
             missing_tasks: &self.missing,
             logs,
+            merged_done_tasks,
+            merged_in_progress_tasks,
+            merged_blocked_tasks,
         }
     }
 
@@ -304,6 +371,27 @@ impl WeeklyReport {
             &ctx,
         )
     }
+}
+
+/// Merge tasks with their mention dates from logs (smart merging)
+fn merge_tasks_with_mentions(
+    tasks: &[Task],
+    mentioned: &HashMap<String, Vec<String>>,
+) -> Vec<TaskWithMentions> {
+    tasks
+        .iter()
+        .map(|task| {
+            let mention_dates = mentioned
+                .get(&task.id)
+                .cloned()
+                .unwrap_or_default();
+
+            TaskWithMentions {
+                task: task.clone(),
+                mention_dates,
+            }
+        })
+        .collect()
 }
 
 /// Extract highlights from logs.
