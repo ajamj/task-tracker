@@ -337,13 +337,13 @@
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
         }
 
         .stat-card.todo .stat-icon { background: rgba(59, 130, 246, 0.1); }
@@ -923,9 +923,9 @@
             </div>
             <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
                 <nav>
-                    <a href="/" class="active">📊 Dashboard</a>
-                    <a href="/tasks">📝 Tasks</a>
-                    <a href="/reports">📈 Reports</a>
+                    <a href="#" class="active" onclick="switchView('list'); return false;">📊 Dashboard</a>
+                    <a href="#" onclick="switchView('list'); return false;">📝 Tasks</a>
+                    <a href="#" onclick="alert('Reports feature coming soon! For now, use: tt report week'); return false;">📈 Reports</a>
                 </nav>
                 <div class="header-actions">
                     <button class="action-btn" onclick="exportData()" title="Export Tasks">
