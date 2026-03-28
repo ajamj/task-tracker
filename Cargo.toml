@@ -2,7 +2,7 @@
 name = "tt"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.80"
+rust-version = "1.82"
 license = "MIT OR Apache-2.0"
 description = "Git-friendly personal task tracking CLI"
 repository = "https://github.com/yourusername/tt"
