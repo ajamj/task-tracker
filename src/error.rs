@@ -53,71 +53,71 @@ pub enum TtError {
 
 impl TtError {
     /// Get user-friendly suggestions for this error
-    pub fn suggestions(&self) -> Vec<&str> {
+    pub fn suggestions(&self) -> Vec<String> {
         match self {
             TtError::WorkspaceNotFound => vec![
-                "Run 'tt init' to initialize a new workspace",
-                "Or navigate to an existing workspace directory",
+                "Run 'tt init' to initialize a new workspace".to_string(),
+                "Or navigate to an existing workspace directory".to_string(),
             ],
             TtError::WorkspaceNotFoundAtPath(path) => vec![
-                &format!("Check if the path exists: {}", path),
-                "Run 'tt init' to initialize a workspace here",
+                format!("Check if the path exists: {}", path),
+                "Run 'tt init' to initialize a workspace here".to_string(),
             ],
             TtError::ProjectNotFound(project) => vec![
-                &format!("Run 'tt project ls' to see available projects"),
-                &format!("Use --project flag with a valid project name"),
-                &format!("Project '{}' doesn't exist in this workspace", project),
+                format!("Run 'tt project ls' to see available projects"),
+                format!("Use --project flag with a valid project name"),
+                format!("Project '{}' doesn't exist in this workspace", project),
             ],
-            TtError::TaskNotFound(id) => vec![
-                "Check the task ID (format: tt-XXXXXX)",
-                "Run 'tt ls' to see all tasks",
-                "Task may be in a different project (use --project flag)",
+            TtError::TaskNotFound(_id) => vec![
+                "Check the task ID (format: tt-XXXXXX)".to_string(),
+                "Run 'tt ls' to see all tasks".to_string(),
+                "Task may be in a different project (use --project flag)".to_string(),
             ],
             TtError::InvalidStatusTransition { from, to } => vec![
-                &format!("Use 'tt start <id>' to transition to 'doing' first"),
-                &format!("Valid transitions: todo→doing, doing→done, todo→blocked"),
-                &format!("Cannot transition directly from '{}' to '{}'", from, to),
+                format!("Use 'tt start <id>' to transition to 'doing' first"),
+                format!("Valid transitions: todo→doing, doing→done, todo→blocked"),
+                format!("Cannot transition directly from '{}' to '{}'", from, to),
             ],
             TtError::TomlParseError(_) => vec![
-                "Check the TOML file for syntax errors",
-                "TOML keys must be quoted strings",
-                "Ensure proper formatting (key = value)",
+                "Check the TOML file for syntax errors".to_string(),
+                "TOML keys must be quoted strings".to_string(),
+                "Ensure proper formatting (key = value)".to_string(),
             ],
             TtError::IoError(e) => vec![
-                &format!("IO error: {}", e),
-                "Check file permissions",
-                "Ensure the file/directory exists",
+                format!("IO error: {}", e),
+                "Check file permissions".to_string(),
+                "Ensure the file/directory exists".to_string(),
             ],
             TtError::TemplateError(_) => vec![
-                "Check template syntax (Jinja2 format)",
-                "Ensure all template variables are defined",
-                "Try using the default template (remove custom template path)",
+                "Check template syntax (Jinja2 format)".to_string(),
+                "Ensure all template variables are defined".to_string(),
+                "Try using the default template (remove custom template path)".to_string(),
             ],
             TtError::IdGenerationError(_) => vec![
-                "Check file permissions in the tasks directory",
-                "Ensure no other process is locking the ID counter",
-                "Try removing the .tt/lock file if it exists",
+                "Check file permissions in the tasks directory".to_string(),
+                "Ensure no other process is locking the ID counter".to_string(),
+                "Try removing the .tt/lock file if it exists".to_string(),
             ],
             TtError::LockError(_) => vec![
-                "Another tt process may be running",
-                "Remove the .tt/lock file if no other process is running",
+                "Another tt process may be running".to_string(),
+                "Remove the .tt/lock file if no other process is running".to_string(),
             ],
             TtError::DateParseError(_) => vec![
-                "Use YYYY-MM-DD format (e.g., 2026-04-03)",
-                "Ensure the date is valid (not Feb 30, etc.)",
+                "Use YYYY-MM-DD format (e.g., 2026-04-03)".to_string(),
+                "Ensure the date is valid (not Feb 30, etc.)".to_string(),
             ],
             TtError::InvalidWeekFormat(_) => vec![
-                "Use ISO week format: YYYY-Www (e.g., 2026-W13)",
-                "Week number must be 01-53",
+                "Use ISO week format: YYYY-Www (e.g., 2026-W13)".to_string(),
+                "Week number must be 01-53".to_string(),
             ],
             TtError::EditorNotFound => vec![
-                "Set the $EDITOR environment variable",
-                "On Windows: setx EDITOR \"notepad.exe\"",
-                "On macOS/Linux: export EDITOR=\"vim\"",
+                "Set the $EDITOR environment variable".to_string(),
+                "On Windows: setx EDITOR \"notepad.exe\"".to_string(),
+                "On macOS/Linux: export EDITOR=\"vim\"".to_string(),
             ],
             TtError::SearchIndexError(_) => vec![
-                "Try rebuilding the search index: rm -rf .tt/index",
-                "Ensure the workspace is initialized",
+                "Try rebuilding the search index: rm -rf .tt/index".to_string(),
+                "Ensure the workspace is initialized".to_string(),
             ],
         }
     }
@@ -161,6 +161,20 @@ pub enum StorageError {
 
     #[error("File lock failed: {0}")]
     LockError(String),
+}
+
+impl From<StorageError> for TtError {
+    fn from(err: StorageError) -> Self {
+        match err {
+            StorageError::WorkspaceNotFound(path) => TtError::WorkspaceNotFoundAtPath(path),
+            StorageError::ProjectNotFound(name) => TtError::ProjectNotFound(name),
+            StorageError::TaskNotFound(id) => TtError::TaskNotFound(id),
+            StorageError::TomlParseError(e) => TtError::TomlParseError(e),
+            StorageError::IoError(e) => TtError::IoError(e),
+            StorageError::IdGenerationError(msg) => TtError::IdGenerationError(msg),
+            StorageError::LockError(msg) => TtError::LockError(msg),
+        }
+    }
 }
 
 /// Result type alias for tt operations.

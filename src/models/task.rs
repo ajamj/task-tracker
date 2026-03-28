@@ -1,12 +1,13 @@
 //! Task data model and related types.
 
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// Unique task identifier (e.g., "tt-000001").
 pub type TaskId = String;
 
 /// Task status representing the lifecycle state.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum TaskStatus {
     Todo,
@@ -14,6 +15,12 @@ pub enum TaskStatus {
     Done,
     Blocked,
     Canceled,
+}
+
+impl fmt::Display for TaskStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.display())
+    }
 }
 
 impl TaskStatus {

@@ -25,7 +25,7 @@ pub mod cli;
 
 // Re-export commonly used types
 pub use error::{Result, StorageError, StorageResult, TtError};
-pub use models::{NewTask, Priority, Project as ProjectConfig, Task, TaskStatus, WeekRange, WorkspaceConfig};
+pub use models::{NewTask, Priority, Task, TaskStatus, WeekRange, WorkspaceConfig};
 pub use storage::{Project, Workspace, TaskStorage, Log, LogStorage, scan_for_task_ids};
 pub use reports::WeeklyReport;
 pub use cli::{Cli, Commands, execute};
