@@ -1,0 +1,62 @@
+[package]
+name = "tt"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT OR Apache-2.0"
+description = "Git-friendly personal task tracking CLI"
+repository = "https://github.com/yourusername/tt"
+keywords = ["cli", "task", "productivity", "rust"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "tt"
+path = "src/main.rs"
+
+[dependencies]
+# CLI
+clap = { version = "4.5", features = ["derive"] }
+
+# TOML
+toml_edit = "0.22"
+toml_datetime = "0.6"
+
+# Date/time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Markdown parsing
+pulldown-cmark = "0.10"
+
+# Templates
+minijinja = { version = "2.0", features = ["loader"] }
+
+# Regex
+regex = "1.10"
+once_cell = "1.19"
+
+# File operations
+fs2 = "0.12"
+dirs = "5.0"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilities
+slug = "0.1"
+
+[dev-dependencies]
+# Snapshot testing
+insta = { version = "1.38", features = ["yaml", "json"] }
+
+# Test utilities
+tempfile = "3.10"
+assert_cmd = "2.0"
+predicates = "3.1"
