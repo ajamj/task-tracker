@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 # CLI
-clap = { version = "4.5", features = ["derive"] }
+clap = { version = "4.4", features = ["derive"] }
 
 # TOML
 toml = "0.8"
