@@ -1,0 +1,21 @@
+version = 1
+
+[workspace]
+default_project = "work"
+week_starts_on = "monday"
+task_id_prefix = "tt-"
+task_id_width = 6
+
+[storage]
+projects_dir = "projects"
+
+[reports]
+track_in_git = true
+weekly_dir = "reports/weekly"
+template = "default"
+# template_path = "templates/weekly_report.j2"  # Optional: custom weekly report template
+# log_template_path = "templates/daily_log.j2"  # Optional: custom daily log template
+
+[git]
+suggest_branch = true
+suggest_commit = true

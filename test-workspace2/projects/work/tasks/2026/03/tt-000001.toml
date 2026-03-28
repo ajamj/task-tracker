@@ -1,0 +1,14 @@
+version = 1
+id = "tt-000001"
+title = "Task pertama"
+status = "todo"
+created_at = "2026-03-28"
+updated_at = "2026-03-28"
+priority = "P1"
+tags = ["test"]
+
+[git_suggestions]
+branch = "work/tt-000001-task-pertama"
+commit_add = "task(add): tt-000001 Task pertama"
+commit_start = "task(start): tt-000001 Task pertama"
+commit_done = "task(done): tt-000001 Task pertama"
